@@ -11,6 +11,7 @@ from selenium.webdriver.chrome.service import Service
 
 import time
 import random
+
 def short_sleep():
     random_number = random.randint(1,4)
     time.sleep(random_number)
@@ -73,7 +74,9 @@ trade_button.click()
 
 short_sleep()
 
-buy_dropdown = driver.find_element(By.NAME, 'side')
+buy_dropdown = WebDriverWait(driver, 10).until(
+    EC.visibility_of_element_located((By.NAME, 'side'))
+)
 buy_dropdown.click()
 select = Select(buy_dropdown)
 select.select_by_visible_text("Buy")
