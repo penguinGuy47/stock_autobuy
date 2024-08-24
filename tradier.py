@@ -13,7 +13,7 @@ import time
 import random
 
 def short_sleep():
-    random_number = random.randint(1,4)
+    random_number = random.randint(1,3)
     time.sleep(random_number)
 
 def rand_sleep():
@@ -24,18 +24,13 @@ def rand_sleep():
 ticker = 'GME'
 
 driver = webdriver.Chrome(service=Service("chromedriver.exe"))
-
 driver.get("https://www.tradier.com/")
-
 wait = WebDriverWait(driver, 10)
 
 login_button = driver.find_element(By.XPATH, "//a[contains(@class, 'ml-8') and contains(text(), 'Login')]")
-
-# Click the "Login" button
 login_button.click()
 
 username="username"
-
 login_field = driver.find_element(By.NAME, "username")
 for char in username:
     login_field.send_keys(char)
@@ -58,16 +53,15 @@ print("Logged into Tradier!")
 rand_sleep()
 
 ticker_search = driver.find_element(By.NAME, "quote_module_symbol_search")
-
 for char in ticker:
     ticker_search.send_keys(char)
     time.sleep(0.1) 
 
-time.sleep(2)
+short_sleep()
 
 ticker_search.send_keys(Keys.ENTER)
 
-time.sleep(2)
+short_sleep()
 
 trade_button = driver.find_element(By.XPATH, "//button[contains(@class, 'button') and contains(@class, 'success') and contains(@class, 'lg')]")
 trade_button.click()
@@ -83,10 +77,10 @@ select.select_by_visible_text("Buy")
 
 short_sleep()
 
+# quantity of shares to purchase
 quantity_field = WebDriverWait(driver, 10).until(
     EC.visibility_of_element_located((By.NAME, "quantity"))
 )
-
 quantity_field.send_keys("1")
 
 rand_sleep()
