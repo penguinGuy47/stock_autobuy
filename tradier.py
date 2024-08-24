@@ -34,14 +34,14 @@ login_button = driver.find_element(By.XPATH, "//a[contains(@class, 'ml-8') and c
 # Click the "Login" button
 login_button.click()
 
-username="minc8088"
+username="username"
 
 login_field = driver.find_element(By.NAME, "username")
 for char in username:
     login_field.send_keys(char)
     time.sleep(0.1) 
 
-pw="Jcpledd123?"
+pw="password"
 pw_field = driver.find_element(By.NAME, "password")
 for char in pw:
     pw_field.send_keys(char)
