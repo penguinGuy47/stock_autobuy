@@ -1,1 +1,11 @@
+import chase
+import fidelity
+import firstrade
+import public
+import robinhood
+import schwaab
+import sofi
+import tornado
 import tradier
+import webull
+import wellsfargo
