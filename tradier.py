@@ -12,7 +12,7 @@ import time
 import sleep
 
 # ticker = input("Please enter the ticker you are buying: ")
-ticker = 'GME'
+ticker = 'QMCO'
 
 driver = webdriver.Chrome(service=Service("chromedriver.exe"))
 driver.get("https://www.tradier.com/")
@@ -21,13 +21,13 @@ wait = WebDriverWait(driver, 10)
 login_button = driver.find_element(By.XPATH, "//a[contains(@class, 'ml-8') and contains(text(), 'Login')]")
 login_button.click()
 
-username="username"
+username="kash0440"
 login_field = driver.find_element(By.NAME, "username")
 for char in username:
     login_field.send_keys(char)
     time.sleep(0.1) 
 
-pw="password"
+pw="Jcpledd123?"
 pw_field = driver.find_element(By.NAME, "password")
 for char in pw:
     pw_field.send_keys(char)
@@ -38,8 +38,14 @@ sleep.short_sleep()
 sign_in_button = driver.find_element(By.XPATH, "//button[contains(text(),'Sign In')]")
 sign_in_button.click()
 
-WebDriverWait(driver, 60).until(EC.url_changes("https://dash.tradier.com/dashboard"))
-print("Logged into Tradier!")
+sleep.rand_sleep()
+current_url = driver.current_url
+sleep.short_sleep()
+
+if "https://dash.tradier.com/dashboard" in current_url:
+    print("Logged into Tradier!")
+else:
+    input("Please complete 2FA if requested and then press Enter to continue...")
 
 sleep.rand_sleep()
 
@@ -74,6 +80,16 @@ quantity_field = wait.until(
 )
 quantity_field.send_keys("1")
 
-sleep.rand_sleep()
+preview_button = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/main/div/div/div[1]/div[2]/div[1]/div[1]/form/div[2]/div/div/button[2]')
+preview_button.click()
+
+sleep.short_sleep()
+
+submit_button = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/main/div/div/div[1]/div[2]/div[1]/div[1]/form/div[2]/div/div/button[3]')
+submit_button.click()
+
+print('Order successfully placed for "' +ticker+ '" on Tradier!')
+
+time.sleep(20)
 
 driver.quit()
