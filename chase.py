@@ -29,7 +29,7 @@ try:
 
     username_field = driver.execute_script('return document.querySelector("#userId").shadowRoot.querySelector("#userId-input")')
     driver.execute_script('arguments[0].click();', username_field)
-    username='kliang9228'
+    username='user'
     for char in username:
         username_field.send_keys(char)
         sleep.human_like()
@@ -39,7 +39,7 @@ try:
 
     pw_field = driver.execute_script('return document.querySelector("#password").shadowRoot.querySelector("#password-input")')
     driver.execute_script('arguments[0].click();', pw_field)
-    pw = 'Jcpledd1'
+    pw = 'pw'
     for char in pw:
         pw_field.send_keys(char)
         sleep.human_like()
@@ -57,7 +57,7 @@ try:
 except Exception as e:
     print(f"An error occurred: {e}")
 
-input("Please complete any necessary actions (e.g., 2FA) and press Enter to continue...")
+input("Please complete 2FA if requested and then press Enter to continue...")
 print("Logged into Chase!")
 
 sleep.rand_sleep()

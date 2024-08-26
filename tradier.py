@@ -21,13 +21,13 @@ wait = WebDriverWait(driver, 10)
 login_button = driver.find_element(By.XPATH, "//a[contains(@class, 'ml-8') and contains(text(), 'Login')]")
 login_button.click()
 
-username="kash0440"
+username="user"
 login_field = driver.find_element(By.NAME, "username")
 for char in username:
     login_field.send_keys(char)
     time.sleep(0.1) 
 
-pw="Jcpledd123?"
+pw="pw"
 pw_field = driver.find_element(By.NAME, "password")
 for char in pw:
     pw_field.send_keys(char)
