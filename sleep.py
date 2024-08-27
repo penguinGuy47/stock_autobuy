@@ -9,6 +9,7 @@ def short_sleep():
     random_num = random.randint(3,4)
     time.sleep(random_num)
 
+# MTF
 def rand_sleep():
     random_num = random.randint(6, 9)
     time.sleep(random_num)
