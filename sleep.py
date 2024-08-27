@@ -6,6 +6,10 @@ def human_like():
     random_num = random.uniform(0.05,0.25)
     time.sleep(random_num)
 
+def very_short_sleep():
+    random_num = random.randint(1,2)
+    time.sleep(random_num)
+
 # for short human-like waits
 def short_sleep():
     random_num = random.randint(3,4)
