@@ -128,9 +128,9 @@ def buy(ticker):
                     preview_button.click()
 
                     # SUBMIT
-                    # sleep.very_short_sleep()
-                    # submit_button = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/main/div/div/div[1]/div[2]/div[1]/div[1]/form/div[2]/div/div/button[3]')
-                    # submit_button.click()
+                    sleep.very_short_sleep()
+                    submit_button = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/main/div/div/div[1]/div[2]/div[1]/div[1]/form/div[2]/div/div/button[3]')
+                    submit_button.click()
 
                     print(f'Order successfully placed for "{ticker}" on Tradier!')
 
