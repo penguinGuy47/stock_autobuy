@@ -10,8 +10,13 @@ import tradier
 import webull
 import wellsfargo
 
-# ticker = input("Enter the ticker you would to purchase: ")
-ticker = 'XCUR'
+def main():
+    # ticker = input("Enter the ticker you would to purchase: ")
+    ticker = 'GLMD'
 
-chase.buy(ticker)
-# tradier.buy(ticker)
+    # chase.buy(ticker)
+    tradier.buy(ticker)
+    # fidelity.buy(ticker)
+
+if __name__ == "__main__":
+    main()
