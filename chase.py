@@ -1,14 +1,4 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from selenium.common.exceptions import TimeoutException
-
+from sleep import *
 import sleep
 import time
 
@@ -31,8 +21,10 @@ def buy(ticker):
         driver.execute_script('arguments[0].click();', username_field)
         sleep.very_short_sleep()
 
-        # CHANGE TO YOUR USERNAME
-        username='user'
+        # ENTER YOUR CREDENTIALS
+        username = ""   # ENTER YOUR USERNAME
+        pw = ""         # ENTER YOUR PASSWORD
+
         for char in username:
             username_field.send_keys(char)
             sleep.human_like()
@@ -42,8 +34,6 @@ def buy(ticker):
         pw_field = driver.execute_script('return document.querySelector("#password").shadowRoot.querySelector("#password-input")')
         driver.execute_script('arguments[0].click();', pw_field)
 
-        # CHANGE TO YOUR PASSWORD
-        pw = 'pw'
         for char in pw:
             pw_field.send_keys(char)
             sleep.human_like()
@@ -62,8 +52,9 @@ def buy(ticker):
     except Exception as e:
         print(f"An error occurred: {e}")
 
+    os.system('echo \a')
     input("\n\nPlease complete 2FA if requested and then press Enter when you reach the dashboard...\n\n\n")
-    print("\nLogin Successful\n")
+    print("Logged into Chase!")
 
     sleep.short_sleep()
 
@@ -82,9 +73,6 @@ def buy(ticker):
         
         account_select = driver.execute_script(script_info)
         driver.execute_script('arguments[0].click();', account_select)
-
-        # account_select = driver.execute_script('return document.querySelector("#account-table-INVESTMENT").shadowRoot.querySelector("#row-header-row0-column0 > div > a > span")')
-        # driver.execute_script('arguments[0].click();', account_select)
 
         sleep.short_sleep()
 
@@ -171,6 +159,6 @@ def buy(ticker):
         driver.get('https://secure.chase.com/web/auth/dashboard#/dashboard/overview')
         sleep.rand_sleep()
 
-    sleep.long_sleep()
+    print("No more accounts to process.")
 
     driver.quit()
