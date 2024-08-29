@@ -14,21 +14,17 @@ def buy(ticker):
     short_sleep()
 
     # ENTER YOUR CREDENTIALS
-    username = ""   # ENTER YOUR USERNAME
+    username = "asdfasfas"   # ENTER YOUR USERNAME
     pw = ""         # ENTER YOUR PASSWORD
 
     username_field = driver.find_element(By.XPATH, '//*[@id="dom-username-input"]')
     username_field.click()
-    for char in username:
-        username_field.send_keys(char)
-        human_like()
+    human_type(username, username_field)
 
     short_sleep()
 
     pw_field = driver.find_element(By.XPATH, '//*[@id="dom-pswd-input"]')
-    for char in pw:
-        pw_field.send_keys(char)
-        human_like()
+    human_type(pw, pw_field)
     short_sleep()
 
     log_in_button = driver.find_element(By.XPATH, '//*[@id="dom-login-button"]')
@@ -75,9 +71,7 @@ def buy(ticker):
         symbol_search = driver.find_element(By.XPATH, '//*[@id="eq-ticket-dest-symbol"]')
 
         # enter ticker
-        for char in ticker:
-            symbol_search.send_keys(char)
-            human_like()
+        human_type(ticker, symbol_search)
         very_short_sleep()
         symbol_search.send_keys(Keys.ENTER)
         very_short_sleep()
@@ -110,9 +104,7 @@ def buy(ticker):
 
         # enter limit price
         limit_price = driver.find_element(By.XPATH, '//*[@id="eqt-ordsel-limit-price-field"]')
-        for char in current_price:
-            limit_price.send_keys(char)
-            human_like()
+        human_type(current_price, limit_price)
         very_short_sleep()
 
         # preview button
