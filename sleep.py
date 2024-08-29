@@ -13,11 +13,18 @@ import time
 import random
 import os
 
+def human_type(word, destination):
+    random_num = random.uniform(0.05,0.25)
+    for char in word:
+        destination.send_keys(char)
+        time.sleep(random_num)
+
 # for typing
 def human_like():
     random_num = random.uniform(0.05,0.25)
     time.sleep(random_num)
 
+# shortest waits
 def very_short_sleep():
     random_num = random.randint(1,2)
     time.sleep(random_num)
