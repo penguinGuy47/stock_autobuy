@@ -37,7 +37,7 @@ def buy(ticker):
     sleep.short_sleep()
 
     os.system('echo \a')
-    input("Please complete 2FA if requested and then press Enter to continue...")
+    input("\n\nPlease complete 2FA if requested and then press Enter when you reach the dashboard...\n\n\n")
     print("Logged into Tradier!")
 
     # click dropdown to show accounts
@@ -149,8 +149,8 @@ def buy(ticker):
                         EC.element_to_be_clickable((By.XPATH, '//*[@id="headlessui-menu-button-3"]/div'))
                     )
                     account_dropdown.click()
-
                     break
+
                 except Exception as e:
                     print(e)
                     continue
