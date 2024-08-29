@@ -12,11 +12,11 @@ import wellsfargo
 
 def main():
     # ticker = input("Enter the ticker you would to purchase: ")
-    ticker = 'GLMD'
+    ticker = 'AMC'
 
     # chase.buy(ticker)
-    tradier.buy(ticker)
-    # fidelity.buy(ticker)
+    # tradier.buy(ticker)
+    fidelity.buy(ticker)
 
 if __name__ == "__main__":
     main()
