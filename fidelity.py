@@ -14,7 +14,7 @@ def buy(ticker):
     short_sleep()
 
     # ENTER YOUR CREDENTIALS
-    username = "asdfasfas"   # ENTER YOUR USERNAME
+    username = ""   # ENTER YOUR USERNAME
     pw = ""         # ENTER YOUR PASSWORD
 
     username_field = driver.find_element(By.XPATH, '//*[@id="dom-username-input"]')
@@ -68,12 +68,12 @@ def buy(ticker):
         account_select.click()
         short_sleep()
 
-        symbol_search = driver.find_element(By.XPATH, '//*[@id="eq-ticket-dest-symbol"]')
+        ticker_search = driver.find_element(By.XPATH, '//*[@id="eq-ticket-dest-symbol"]')
 
         # enter ticker
-        human_type(ticker, symbol_search)
+        human_type(ticker, ticker_search)
         very_short_sleep()
-        symbol_search.send_keys(Keys.ENTER)
+        ticker_search.send_keys(Keys.ENTER)
         very_short_sleep()
 
         # click buy
