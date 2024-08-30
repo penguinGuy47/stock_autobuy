@@ -18,8 +18,9 @@ def main():
 
     # chase.buy(ticker)
     # tradier.buy(ticker)
-    fidelity.buy(ticker)
+    # fidelity.buy(ticker)
     # firstrade.buy(ticker, chrome_path, chrome_profile)
+    schwaab.buy(ticker, chrome_path, chrome_profile)
 
 if __name__ == "__main__":
     main()
