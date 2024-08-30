@@ -15,10 +15,11 @@ def buy(ticker):
     # sign in field
     try:
         driver.find_elements(By.TAG_NAME, "iframe")
-        
-        # Switch to the iframe using its id or name
+        # Switch to the iframe using its id
         wait.until(EC.frame_to_be_available_and_switch_to_it((By.ID, "logonbox")))
         sleep.very_short_sleep()
+
+        # get username
         username_field = wait.until(lambda driver: driver.execute_script('return document.querySelector("#userId").shadowRoot.querySelector("#userId-input")'))
         driver.execute_script('arguments[0].click();', username_field)
         sleep.very_short_sleep()
