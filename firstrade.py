@@ -13,8 +13,8 @@ def buy(ticker, dir, prof):
     short_sleep()
 
     # ENTER YOUR CREDENTIALS
-    username = ""   # ENTER YOUR USERNAME
-    pw = ""         # ENTER YOUR PASSWORD
+    username = "kash0440"   # ENTER YOUR USERNAME
+    pw = "Jcpledd123!"         # ENTER YOUR PASSWORD
 
     username_field = driver.find_element(By.XPATH, '//*[@id="username"]')
     username_field.click()
@@ -81,13 +81,10 @@ def buy(ticker, dir, prof):
         send_button = driver.find_element(By.XPATH, '//*[@id="submitOrder"]')
         send_button.click()
         short_sleep()
+        
+        print("No more accounts to process.")
+        driver.quit()
 
-
-
-
-    long_sleep()
-    
-    print("No more accounts to process.")
-    driver.quit()
-    exit()
+def buy(ticker, dir, prof):
+    pass
 
