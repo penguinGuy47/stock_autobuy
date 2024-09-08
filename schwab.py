@@ -116,7 +116,7 @@ def buy(ticker, dir, prof):
         short_sleep()
 
 def sell(ticker, dir, prof):
-
+    pass
 
     
 
