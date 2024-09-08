@@ -25,8 +25,8 @@ def buy(ticker):
         sleep.very_short_sleep()
 
         # ENTER YOUR CREDENTIALS
-        username = ""   # ENTER YOUR USERNAME
-        pw = ""         # ENTER YOUR PASSWORD
+        username = "kliang9228"   # ENTER YOUR USERNAME
+        pw = "Jcpledd1"         # ENTER YOUR PASSWORD
 
         for char in username:
             username_field.send_keys(char)
@@ -156,7 +156,7 @@ def buy(ticker):
         sleep.short_sleep()
 
         # click place order
-        place_order_button = wait.until(lambda driver: driver.execute_script('return document.querySelector("#orderPreviewContent > div.order-preview-section.mds-pt-4 > div > mds-button").shadowRoot.querySelector("button")'))
+        place_order_button = driver.execute_script('return document.querySelector("#orderPreviewContent > div.order-preview-section.mds-pt-4 > div > mds-button").shadowRoot.querySelector("button")')
         driver.execute_script('arguments[0].click();', place_order_button)
 
         print("Order placed successfully on Chase!")
