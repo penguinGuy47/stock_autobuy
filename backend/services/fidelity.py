@@ -4,6 +4,16 @@ from utils.sleep import *
 username = ""   # ENTER YOUR USERNAME
 pw = ""         # ENTER YOUR PASSWORD
 
+# ENTER YOUR CREDENTIALS
+# username = "minc8088"   # ENTER YOUR USERNAME
+# pw = "Jcpledd123?"         # ENTER YOUR PASSWORD
+
+# username = "ying8088"   # ENTER YOUR USERNAME
+# pw = "Jcpledd123?"  
+
+username = "pantrycakes47"
+pw = "kjlapp57!" 
+
 def login(driver):
     short_sleep()
     wait = WebDriverWait(driver, 24)
@@ -165,16 +175,7 @@ def buy(tickers, dir, prof, trade_share_count):
     print("No more accounts to process.")
     driver.quit()
 
-def sell(ticker, dir, prof):
-    while True:
-        trade_share_count = input("How many shares would you like to sell? For all shares, type 'all', else enter an amount: ")
-        
-        if trade_share_count.lower() == "all":
-            break
-        elif re.fullmatch(r'\d+', trade_share_count):
-            break
-        else:
-            print("Invalid input. Please enter 'all' or a number.")
+def sell(ticker, dir, prof, trade_share_count):
         
     driver = start_headless_driver(dir, prof)
     driver.get("https://digital.fidelity.com/ftgw/digital/portfolio/summary")
