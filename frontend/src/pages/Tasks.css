@@ -1,0 +1,22 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+.bg-dark {
+  background-color: #1a1a1a !important;
+}
+.bg-secondary {
+  background-color: #2a2a2a !important;
+}
+.nav-item {
+  padding: 10px 0;
+  cursor: pointer;
+}
+.nav-item:hover {
+  color: #ccc;
+}
+.list-group-item {
+  background-color: #333;
+  color: white;
+  border: none;
+}
