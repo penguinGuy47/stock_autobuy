@@ -5,7 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Sidebar from './components/Sidebar';
-import Profiles from './components/Profiles'
+import Profiles from './pages/Profiles'
 import Tasks from './pages/Tasks';
 import Dashboard from './pages/Dashboard';
 
