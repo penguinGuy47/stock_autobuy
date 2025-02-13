@@ -5,6 +5,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import api from '../services/api';
 import "./Tasks.css";
 import { saveData, getData, removeData } from '../utils/localStorage';
+import TaskModal from '../components/TaskModal';
 
 const Tasks = () => {
   const formKey = `tasksForm`;
@@ -15,54 +16,20 @@ const Tasks = () => {
   const [profiles, setProfiles] = useState(() => getData("profiles") || []);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
   const [editingIndex, setEditingIndex] = useState(null);
-  const [method, setMethod] = useState(""); 
-  const [twoFaCode, setTwoFaCode] = useState(""); 
-  const [showTwoFaInput, setShowTwoFaInput] = useState(false);
+
+  // 2FA related state for modal (for starting task)
+  const [requireTwoFA, setRequireTwoFA] = useState(false);
   const [sessionId, setSessionId] = useState(null);
+  const [method, setMethod] = useState("");
 
-  const [taskForm, setTaskForm] = useState({
-    name: getData(`${formKey}_name`) || "",
-    tickers: Array.isArray(getData(`${formKey}_tickers`)) ? getData(`${formKey}_tickers`) : [""], // Ensure tickers is an array
-    broker: getData(`${formKey}_broker`) || "",
-    quantity: getData(`${formKey}_quantity`) || "",
-    action: getData(`${formKey}_action`) || "",
-    username: getData(`${formKey}_username`) || "",
-    password: getData(`${formKey}_password`) || "",
-  });
-
-  // const createProfile = () => {
-  //   const broker = prompt("Enter broker:");
-  //   const username = prompt("Enter username:");
-  //   const password = prompt("Enter password:");
-  //   if (broker && username && password) {
-  //     const newProfile = { broker, username, password };
-  //     setProfiles([...profiles, newProfile]);
-  //   }
-  // };
-
-  // const deleteProfile = (index) => {
-  //   const updatedProfiles = profiles.filter((_, i) => i !== index);
-  //   setProfiles(updatedProfiles);
-  // };
-
-  // const getProfilesForBroker = (broker) => {
-  //   return profiles.filter(profile => profile.broker === broker);
-  // };
-  
-  // Save form data to localStorage when fields change
+  // Save task groups, tasks, and profiles to localStorage when they change
   useEffect(() => {
     saveData(`${formKey}_taskGroups`, taskGroups);
     saveData(`${formKey}_tasks`, tasks);
-    saveData(`${formKey}_name`, taskForm.name);
     saveData(`${formKey}_profiles`, profiles);
-    saveData(`${formKey}_tickers`, taskForm.tickers);
-    saveData(`${formKey}_broker`, taskForm.broker);
-    saveData(`${formKey}_quantity`, taskForm.quantity);
-    saveData(`${formKey}_action`, taskForm.action);
-    saveData(`${formKey}_username`, taskForm.username);
-    saveData(`${formKey}_password`, taskForm.password);
-  }, [taskGroups, tasks, taskForm]);
+  }, [taskGroups, tasks, profiles]);
 
   useEffect(() => {
     if (selectedGroup !== null) {
@@ -86,6 +53,7 @@ const Tasks = () => {
   };
 
   const handleStartTask = async (index) => {
+    if (!selectedGroup) return;
     const taskToStart = tasks[selectedGroup][index];
   
     // Basic validation
@@ -99,12 +67,6 @@ const Tasks = () => {
       !taskToStart.password
     ) {
       toast.error('Please fill in all required fields.');
-      return;
-    }
-  
-    // Validation for quantity
-    if (!/^\d+$/.test(taskToStart.quantity) || parseInt(taskToStart.quantity) <= 0) {
-      toast.error('Please enter a valid quantity.');
       return;
     }
   
@@ -127,149 +89,29 @@ const Tasks = () => {
       if (response.data.status === 'success') {
         updatedTasks[index].status = 'Success';
         toast.success(`${taskToStart.action} successful.`);
+        setTasks({ ...tasks, [selectedGroup]: updatedTasks });
       } else if (response.data.status === '2FA_required') {
         updatedTasks[index].status = '2FA';
-        setShowTwoFaInput(true); // Show 2FA input
-        setSessionId(response.data.session_id); // Store session ID for 2FA
-        setMethod(response.data.method); // Store method for 2FA
+        // Set 2FA state and open modal for 2FA submission
+        setRequireTwoFA(true);
+        setSessionId(response.data.session_id);
+        setMethod(response.data.method);
+        setEditingIndex(index);
+        setEditingTask(taskToStart);
+        setShowModal(true);
         toast.info('2FA is required.');
       }  else {
-        updatedTasks[index].status = 'Failed';  // Change status on trade failure
+        updatedTasks[index].status = 'Failed';
         toast.error(`${taskToStart.action} failed: ${response.data.message || 'Unknown error.'}`);
+        setTasks({ ...tasks, [selectedGroup]: updatedTasks });
       }
     } catch (error) {
-      updatedTasks[index].status = 'Error';  // Handle errors gracefully
+      updatedTasks[index].status = 'Error';
       toast.error(`Task failed: ${error.response?.data?.error || 'Unknown error.'}`);
-    } finally {
       setTasks({ ...tasks, [selectedGroup]: updatedTasks });
     }
   };
   
-  
-  const handleTickerChange = (index, value) => {
-    const updatedTickers = Array.isArray(taskForm.tickers) ? [...taskForm.tickers] : [""];
-    updatedTickers[index] = value.toUpperCase();
-    setTaskForm({ ...taskForm, tickers: updatedTickers });
-  };
-
-  const addTickerField = () => {
-    setTaskForm({ ...taskForm, tickers: [...taskForm.tickers, ""] });
-  };
-
-  const removeTickerField = (index) => {
-    const updatedTickers = [...taskForm.tickers];
-    updatedTickers.splice(index, 1);
-    setTaskForm({ ...taskForm, tickers: updatedTickers });
-  };
-
-  const handleTaskSubmit = () => {
-    if (!taskForm.name || !taskForm.broker || !taskForm.quantity || !taskForm.action) {
-        toast.error("Please fill in all required fields.");
-        return;
-    }
-
-    const selectedProfile = profiles.find(profile => profile.username === taskForm.username);
-
-    if (!selectedProfile) {
-        toast.error("Selected profile does not exist.");
-        return;
-    }
-
-    const payload = {
-        ...taskForm,
-        username: selectedProfile.username,
-        password: selectedProfile.password,
-    };
-
-    console.log("Payload:", payload);
-    setShowModal(false);
-  };
-
-  // const filteredProfiles = profiles.filter(profile => profile.broker === taskForm.broker);
-    
-  // const handleProfileChange = (e) => {
-  //     const selectedProfile = profiles.find(profile => profile.username === e.target.value);
-  
-  //     if (selectedProfile) {
-  //         setTaskForm({
-  //             ...taskForm,
-  //             username: selectedProfile.username,
-  //             password: selectedProfile.password,
-  //         });
-  //     }
-  // };
-
-
-  const handle2FASubmit = async (e) => {
-    e.preventDefault();
-  
-    if ((method === 'text' || method === 'captcha_and_text') && !twoFaCode) {
-      toast.error('Please enter the 2FA code.');
-      return;
-    }
-
-    const updatedTasks = [...tasks[selectedGroup]];
-  
-    try {
-      const payload = {
-        session_id: sessionId,
-        two_fa_code: method === 'app' ? null : twoFaCode,
-      };
-  
-      const response = await api.post('/complete_2fa', payload);
-  
-      if (response.data.status === 'success') {
-        updatedTasks[editingIndex] = { ...taskForm, status: 'Success' };
-        toast.success('Trade successful.');
-        setShowTwoFaInput(false); // Hide the 2FA input
-      } else {
-        updatedTasks[editingIndex] = { ...taskForm, status: 'Failed - Response' };
-        toast.error(`2FA failed: ${response.data.message || 'Unknown error.'}`);
-      }
-    } catch (error) {
-      updatedTasks[editingIndex] = { ...taskForm, status: 'Failed - Unknown' };
-      console.error('2FA failed:', error.response ? error.response.data : error.message);
-      toast.error(`2FA failed: ${error.response?.data?.error || 'Unknown error.'}`);
-    } finally {
-      setTwoFaCode(""); // Clear the 2FA code
-    }
-  };
-  
-  
-
-  const resetTaskForm = () => {
-    setTaskForm({
-      name: "",
-      tickers: [""],
-      broker: "",
-      quantity: "",
-      action: "",
-      username: "",
-      password: "",
-    });
-    setEditingIndex(null);
-
-    // Remove data from localStorage
-    removeData(`${formKey}_name`);
-    removeData(`${formKey}_tickers`);
-    removeData(`${formKey}_broker`);
-    removeData(`${formKey}_quantity`);
-    removeData(`${formKey}_action`);
-    removeData(`${formKey}_username`);
-    removeData(`${formKey}_password`);
-  };
-
-  const handleTaskEdit = (index) => {
-    if (!selectedGroup) return;
-    const taskToEdit = tasks[selectedGroup][index];
-    setTaskForm({
-      ...taskToEdit,
-      tickers: Array.isArray(taskToEdit.tickers) ? taskToEdit.tickers : [""], // Ensure tickers is an array
-    });
-    setEditingIndex(index);
-    setShowModal(true);
-  };
-
   const handleTaskDuplicate = (index) => {
     if (!selectedGroup) return;
     const taskToDuplicate = tasks[selectedGroup][index];
@@ -290,13 +132,46 @@ const Tasks = () => {
     if (groupToDelete === selectedGroup) {
       setSelectedGroup(null);
     }
-
     const updatedTaskGroups = taskGroups.filter((_, i) => i !== index);
     const updatedTasks = { ...tasks };
     delete updatedTasks[groupToDelete];
-
     setTaskGroups(updatedTaskGroups);
     setTasks(updatedTasks);
+  };
+
+  const openTaskModalForEdit = (index) => {
+    if (!selectedGroup) return;
+    setEditingTask(tasks[selectedGroup][index]);
+    setEditingIndex(index);
+    setRequireTwoFA(false);
+    setShowModal(true);
+  };
+
+  const openTaskModalForCreate = () => {
+    setEditingTask(null);
+    setEditingIndex(null);
+    setRequireTwoFA(false);
+    setShowModal(true);
+  };
+
+  const handleTaskModalSave = (payload) => {
+    if (!selectedGroup) return;
+    if (editingIndex === null) {
+      // Create new task
+      const updatedTasks = tasks[selectedGroup] ? [...tasks[selectedGroup], payload] : [payload];
+      setTasks({ ...tasks, [selectedGroup]: updatedTasks });
+    } else {
+      // Update existing task
+      const updatedTasks = [...tasks[selectedGroup]];
+      updatedTasks[editingIndex] = payload;
+      setTasks({ ...tasks, [selectedGroup]: updatedTasks });
+    }
+    setShowModal(false);
+    setEditingTask(null);
+    setEditingIndex(null);
+    setRequireTwoFA(false);
+    setSessionId(null);
+    setMethod("");
   };
 
   return (
@@ -339,10 +214,7 @@ const Tasks = () => {
         {activeTab === "Tasks" && selectedGroup ? (
           <>
             <h5>Tasks in {selectedGroup}</h5>
-            <button className="btn btn-primary mb-3" onClick={() => {
-              resetTaskForm();
-              setShowModal(true)
-            }}>
+            <button className="btn btn-primary mb-3" onClick={openTaskModalForCreate}>
               + Create Task
             </button>
 
@@ -393,7 +265,7 @@ const Tasks = () => {
                       </button>
                       <button
                         className="btn btn-secondary btn-sm"
-                        onClick={() => handleTaskEdit(index)}
+                        onClick={() => openTaskModalForEdit(index)}
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -452,185 +324,23 @@ const Tasks = () => {
         )}
       </div>
 
-      {/* Task Form Modal */}
-      {showModal && (
-        <div className="modal show d-block" role="dialog">
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title text-dark">Task Details</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowModal(false)}
-                ></button>
-              </div>
-              <div className="modal-body text-dark">
-                <form>
-                  {/* Task Name */}
-                  <div className="mb-3">
-                    <label className="form-label text-dark">Task Name</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={taskForm.name}
-                      onChange={(e) => setTaskForm({ ...taskForm, name: e.target.value })}
-                    />
-                  </div>
-
-                  {/* Ticker Fields */}
-                  <div className="mb-3">
-                    <label className="form-label text-dark">Tickers</label>
-                    {taskForm.tickers.map((ticker, index) => (
-                      <div key={index} className="d-flex align-items-center mb-2">
-                        <input
-                          type="text"
-                          className="form-control me-2"
-                          value={ticker}
-                          onChange={(e) => handleTickerChange(index, e.target.value)}
-                        />
-                        {taskForm.tickers.length > 1 && (
-                          <button
-                            type="button"
-                            className="btn btn-danger btn-sm me-2"
-                            onClick={() => removeTickerField(index)}
-                          >
-                            &ndash;
-                          </button>
-                        )}
-                        {index === taskForm.tickers.length - 1 && (
-                          <button
-                            type="button"
-                            className="btn btn-success btn-sm"
-                            onClick={addTickerField}
-                          >
-                            +
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Broker */}
-                  <div className="mb-3">
-                    <label className="form-label text-dark">Broker</label>
-                    <select
-                      className="form-select"
-                      value={taskForm.broker}
-                      onChange={(e) => setTaskForm({ ...taskForm, broker: e.target.value })}
-                    >
-                      <option value="">Select Broker</option>
-                      <option value="chase">Chase</option>
-                      <option value="fidelity">Fidelity</option>
-                      <option value="firstrade">Firstrade</option>
-                      <option value="public">Public</option>
-                      <option value="schwab">Schwab</option>
-                      <option value="wells">Wells Fargo</option>
-                    </select>
-                  </div>
-
-                  {/* Quantity */}
-                  <div className="mb-3">
-                    <label className="form-label text-dark">Quantity</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      value={taskForm.quantity}
-                      onChange={(e) => setTaskForm({ ...taskForm, quantity: e.target.value })}
-                    />
-                  </div>
-
-                  {/* Action */}
-                  <div className="mb-3">
-                    <label className="form-label text-dark">Action</label>
-                    <select
-                      className="form-select"
-                      value={taskForm.action}
-                      onChange={(e) => setTaskForm({ ...taskForm, action: e.target.value })}
-                    >
-                      <option value="">Select Action</option>
-                      <option value="Buy">Buy</option>
-                      <option value="Sell">Sell</option>
-                    </select>
-                  </div>
-
-                  {/* Profile Selection
-                  {taskForm.broker && (
-                    <div className="mb-3">
-                      <label className="form-label text-dark">Select Profile</label>
-                      <select
-                        className="form-select"
-                        onChange={handleProfileChange}
-                      >
-                        <option value="">Select Profile</option>
-                        {filteredProfiles.map((profile, index) => (
-                          <option key={index} value={profile.username}>
-                            {profile.username}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )} */}
-
-                  {/* Username */}
-                  <div className="mb-3">
-                    <label className="form-label text-dark">Username</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={taskForm.username}
-                      onChange={(e) => setTaskForm({ ...taskForm, username: e.target.value })}
-                    />
-                  </div>
-
-                  {/* Password */}
-                  <div className="mb-3">
-                    <label className="form-label text-dark">Password</label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      value={taskForm.password}
-                      onChange={(e) => setTaskForm({ ...taskForm, password: e.target.value })}
-                    />
-                  </div>
-
-                  {/* 2FA Code Input (conditionally displayed) */}
-                  {showTwoFaInput && (
-                    <div className="mb-3">
-                      <label className="form-label text-dark">2FA Code</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={twoFaCode}
-                        onChange={(e) => setTwoFaCode(e.target.value)}
-                      />
-                      <button className="btn btn-primary mt-2" onClick={handle2FASubmit}>
-                        Submit 2FA
-                      </button>
-                    </div>
-                  )}
-                </form>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowModal(false)}
-                >
-                  Close
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleTaskSubmit}
-                >
-                  Save Task
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Task Modal */}
+      <TaskModal
+        show={showModal}
+        handleClose={() => {
+          setShowModal(false);
+          setRequireTwoFA(false);
+          setSessionId(null);
+          setMethod("");
+          setEditingTask(null);
+          setEditingIndex(null);
+        }}
+        handleSave={handleTaskModalSave}
+        initialData={editingTask}
+        requireTwoFA={requireTwoFA}
+        sessionId={sessionId}
+        method={method}
+      />
     </div>
   );
 };
