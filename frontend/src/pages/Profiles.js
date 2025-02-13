@@ -2,6 +2,7 @@ import React, {useState, useEffect} from "react";
 import {toast} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'
 import { saveData, getData } from "../utils/localStorage";
+import './Profiles.css';
 
 const Profiles = () => {
     const formKey = "profiles";
