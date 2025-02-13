@@ -11,8 +11,6 @@ const TaskModal = ({ show, handleClose, handleSave }) => {
         action: "",
     });
 
-    const [filteredProfiles, setFilteredProfiles] = useState([]);
-
     useEffect(() => {
         const allProfiles = getData("profiles") || [];
         const brokerProfiles = allProfiles.filter(
@@ -25,20 +23,20 @@ const TaskModal = ({ show, handleClose, handleSave }) => {
         setTaskDetails({ ...taskDetails, broker: e.target.value, profile: "" });
     };
 
+    const filteredProfiles = profiles.filter(profile => profile.broker === taskForm.broker);
+    
     const handleProfileChange = (e) => {
-      const selectedProfile = filteredProfiles.find(
-          (profile) => profile.username === e.target.value
-      );
-  
-      if (selectedProfile) {
-          setTaskDetails({
-              ...taskDetails,
-              profile: e.target.value,
-              username: selectedProfile.username,
-              password: selectedProfile.password,
-          });
-      }
+        const selectedProfile = profiles.find(profile => profile.username === e.target.value);
+    
+        if (selectedProfile) {
+            setTaskForm({
+                ...taskForm,
+                username: selectedProfile.username,
+                password: selectedProfile.password,
+            });
+        }
     };
+    
   
 
     const handleSubmit = () => {

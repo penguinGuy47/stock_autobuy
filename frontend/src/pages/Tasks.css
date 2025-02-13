@@ -20,3 +20,7 @@ body {
   color: white;
   border: none;
 }
+
+.col-3 {
+  margin-right: 10px; /* Adjust the gap as needed */
+}

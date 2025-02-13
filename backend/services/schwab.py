@@ -54,7 +54,7 @@ def login(driver, tempdir ,username, password):
         return {'status': '2FA_required', 'method': 'app', 'session_id': session_id}
     except:
         try: 
-            print("An error occurred during mobile authentication, trying text authentication")
+            # Send as text
             text_auth = WebDriverWait(driver, 4).until(
                 EC.element_to_be_clickable((By.XPATH, '//*[@id="otp_sms"]'))
             )

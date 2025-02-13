@@ -54,62 +54,60 @@ def login(driver, tempdir, username, password):
             dont_ask_again_button.click()
             very_short_sleep()
 
-            # Attempt 2FA via App Notification
+            # Attempt 2FA via Text
             try:
-                send_2fa_button = wait.until(
+                send_as_text = wait.until(
                     EC.element_to_be_clickable((
-                        By.XPATH, '//*[@id="dom-push-primary-button"]'))
+                        By.XPATH, '//*[@id="dom-try-another-way-link"]'))
                 )
-                send_2fa_button.click()
-                logger.info("Sent 2FA request via app notification.")
+                send_as_text.click()
+
+                logger.info("Attempting to send 2FA code via text.")
+                text_code_button = wait.until(
+                    EC.element_to_be_clickable((
+                        By.XPATH, '//*[@id="dom-channel-list-primary-button"]'))
+                )
+                text_code_button.click()
+                very_short_sleep()
 
                 # Generate a unique session ID
                 session_id = str(uuid.uuid4())
                 two_fa_sessions[session_id] = {
                     'driver': driver,
-                    'temp_dir': tempdir,
+                    'temp_dir': tempdir,  # Store temp_dir for cleanup
                     'username': username,
                     'password': password,
-                    'method': 'app',
+                    'method': 'text',
                     'action': None  # To be set by buy/sell functions
                 }
 
-                # Indicate that App Notification-Based 2FA is required
-                return {'status': '2FA_required', 'method': 'app', 'session_id': session_id}
+                # Indicate that Text-Based 2FA is required
+                return {'status': '2FA_required', 'method': 'text', 'session_id': session_id}
 
             except TimeoutException:
                 logger.warning("Text-Based 2FA not available. Trying App Notification.")
-                
-                # Attempt 2FA via Text
+                # Attempt 2FA via App Notification
                 try:
-                    send_as_text = wait.until(
+                    send_2fa_button = wait.until(
                         EC.element_to_be_clickable((
-                            By.XPATH, '//*[@id="dom-try-another-way-link"]'))
+                            By.XPATH, '//*[@id="dom-push-primary-button"]'))
                     )
-                    send_as_text.click()
-
-                    logger.info("Attempting to send 2FA code via text.")
-                    text_code_button = wait.until(
-                        EC.element_to_be_clickable((
-                            By.XPATH, '//*[@id="dom-channel-list-primary-button"]'))
-                    )
-                    text_code_button.click()
-                    very_short_sleep()
+                    send_2fa_button.click()
+                    logger.info("Sent 2FA request via app notification.")
 
                     # Generate a unique session ID
                     session_id = str(uuid.uuid4())
                     two_fa_sessions[session_id] = {
                         'driver': driver,
-                        'temp_dir': tempdir,  # Store temp_dir for cleanup
+                        'temp_dir': tempdir,
                         'username': username,
                         'password': password,
-                        'method': 'text',
+                        'method': 'app',
                         'action': None  # To be set by buy/sell functions
                     }
 
-                    # Indicate that Text-Based 2FA is required
-                    return {'status': '2FA_required', 'method': 'text', 'session_id': session_id}
-                
+                    # Indicate that App Notification-Based 2FA is required
+                    return {'status': '2FA_required', 'method': 'app', 'session_id': session_id}
 
                 except TimeoutException:
                     logger.error("Failed to initiate 2FA.")
@@ -147,7 +145,7 @@ def complete_2fa_and_trade(session_id, two_fa_code=None):
     method = session_info['method']
     action = session_info['action']
     tickers = session_info.get('tickers')
-    ticker = session_info.get('ticker')
+    # ticker = session_info.get('ticker')
     trade_share_count = session_info.get('trade_share_count')
     username = session_info.get('username')
     password = session_info.get('password')
@@ -219,7 +217,7 @@ def complete_2fa_and_trade(session_id, two_fa_code=None):
         if action == 'buy':
             trade_response = buy_after_login(driver, tickers, trade_share_count)
         elif action == 'sell':
-            trade_response = sell_after_login(driver, ticker, trade_share_count)
+            trade_response = sell_after_login(driver, tickers, trade_share_count)
         else:
             logger.error("Invalid trade action specified.")
             driver.quit()
@@ -296,6 +294,7 @@ def buy_after_login(driver, tickers, trade_share_count):
 
         logger.info(f"Number of accounts found: {account_count}")
         logger.info("Iterating through accounts now...")
+
         for num in range(account_count):
             if num != 0:
                 account_dropdown = driver.find_element(By.XPATH, '//*[@id="dest-acct-dropdown"]')
@@ -309,7 +308,6 @@ def buy_after_login(driver, tickers, trade_share_count):
 
                 logger.info("Clicking buy...")
                 logger.info(f"Attempting to buy {trade_share_count} shares of {ticker}")
-                # Click buy
                 buy_button = driver.find_element(By.XPATH, '//*[@id="action-buy"]/s-root/div')
                 buy_button.click()
                 very_short_sleep()
@@ -417,8 +415,6 @@ def sell_after_login(driver, tickers, trade_share_count):
         logger.info(f"Number of accounts found: {account_count}")
         logger.info("Iterating through accounts now...")
 
-        logger.info(f"DEBUG: account_count = {account_count} (type: {type(account_count)})")
-
         for num in range(account_count):
             if num != 0:
                 account_dropdown = driver.find_element(By.XPATH, '//*[@id="dest-acct-dropdown"]')
@@ -426,6 +422,7 @@ def sell_after_login(driver, tickers, trade_share_count):
             very_short_sleep()
             switchAccounts(driver, num)
             short_sleep()
+
             for ticker in tickers:
                 ticker_search(driver, ticker)
 
