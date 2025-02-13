@@ -64,7 +64,7 @@ def sell_stock():
     try:
         data = request.json
         logger.info(f"Received sell request: {data}")
-        tickers = data.get('tickers')  # Single ticker
+        tickers = data.get('tickers')
         broker = data.get('broker')
         quantity = data.get('quantity')
         username = data.get('username')
@@ -106,6 +106,8 @@ def complete_2fa_endpoint():
         from services.wellsfargo import two_fa_sessions as wells_two_fa_sessions, complete_2fa_and_trade as wells_complete_2fa_and_trade
         from services.webull import two_fa_sessions as webull_two_fa_sessions, complete_2fa_and_trade as webull_complete_2fa_and_trade
         from services.public import two_fa_sessions as public_two_fa_sessions, complete_2fa_and_trade as public_complete_2fa_and_trade
+
+        logger.info(f"Received session ID for 2FA completion: {session_id}")
 
         if session_id in two_fa_sessions:
             trade_response = complete_2fa_and_trade(
