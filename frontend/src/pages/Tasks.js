@@ -238,7 +238,7 @@ const Tasks = () => {
                   className="row align-items-center mb-2 bg-secondary text-white p-2 rounded"
                   key={index}
                 >
-                  <div className="col-1 text-start">{task.name}</div>
+                  <div className="col-1 text-start">{task.username}</div>
                   <div className="col-1 text-start">{task.action}</div>
                   <div className="col-3 text-start">
                     {Array.isArray(task.tickers) ? task.tickers.join(', ') : task.tickers}
