@@ -220,9 +220,9 @@ const Tasks = () => {
 
             {/* Status Bar */}
             <div className="row text-start fw-bold mb-3">
-              <div className="col-1">Task Name</div>
+              <div className="col-2">Task Name</div>
               <div className="col-1">Type</div>
-              <div className="col-3">Tickers</div>
+              <div className="col-2">Tickers</div>
               <div className="col">Broker</div>
               <div className="col-1">Quantity</div>
               <div className="col-2">Status</div>
@@ -238,9 +238,9 @@ const Tasks = () => {
                   className="row align-items-center mb-2 bg-secondary text-white p-2 rounded"
                   key={index}
                 >
-                  <div className="col-1 text-start">{task.username}</div>
+                  <div className="col-2 text-start">{task.username}</div>
                   <div className="col-1 text-start">{task.action}</div>
-                  <div className="col-3 text-start">
+                  <div className="col-2 text-start">
                     {Array.isArray(task.tickers) ? task.tickers.join(', ') : task.tickers}
                   </div>
                   <div className="col text-start">{task.broker}</div>
