@@ -15,6 +15,8 @@ const Profiles = () => {
         password: "",
     });
 
+    const [showPassword, setShowPassword] = useState(false);
+
     useEffect(() => {
         saveData("profiles", profiles); // Ensure profiles are saved correctly
     }, [profiles]);
@@ -49,6 +51,7 @@ const Profiles = () => {
         setEditingIndex(index);
         setNewProfile(profiles[index]);
         setShowModal(true);
+        setShowPassword(false);
     };
 
     const deleteProfile = (index) => {
