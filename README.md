@@ -1,18 +1,12 @@
 A program that will automatically purchase stocks in a streamlined fashion after getting input from the user.
 
-Current upcoming updates:
+Upcoming updates:
 - More brokerages
-- Ability to purchase different stocks
-- Ability to sell
-- Improved 2FA handling
 - Headless
-- UI
 
 To run:
 
 1. Download
-2. Go into each broker file and add your username/password
-3. Run venv ".\env\Scripts\activate"
-4. Run main.py "python main.py"
-5. Input your ticker
-6. Watch terminal for 2FA requests
+2. Right click and edit the start.bat file
+3. Change the path "C:\Users\%USERNAME%\Desktop\Code\Python\autobuy" to your downloaded path
+4. start.bat
