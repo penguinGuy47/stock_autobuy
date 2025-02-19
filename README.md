@@ -1,5 +1,18 @@
 A program that will automatically purchase stocks in a streamlined fashion after getting input from the user.
 
+Current Features:
+ - User friendly UI
+ - Profiles
+ - Task management
+ - Real-time updates
+ - Broker support:
+   - Fidelity
+   - Chase
+   - Schwab
+   - Firstrade
+   - Wells Fargo
+   - Public
+
 Upcoming updates:
 - More brokerages
 - Headless
