@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 const ProductTaskModal = ({ show, handleClose, handleSave, initialData, groupSite }) => {
   const defaultTask = {
     name: "",
-    billing: "",
+    sku: "",
     profile: ""
   };
 
@@ -22,7 +22,7 @@ const ProductTaskModal = ({ show, handleClose, handleSave, initialData, groupSit
   };
 
   const onSave = () => {
-    if (!task.name || !task.billing || !task.profile) {
+    if (!task.name || !task.sku || !task.profile) {
       toast.error("Please fill in all required fields.");
       return;
     }
@@ -49,10 +49,10 @@ const ProductTaskModal = ({ show, handleClose, handleSave, initialData, groupSit
                 <label className="form-label">Task Name</label>
                 <input type="text" className="form-control" name="name" value={task.name} onChange={handleChange} />
               </div>
-              {/* Billing Information */}
+              {/* SKU Information */}
               <div className="mb-3">
-                <label className="form-label">Billing Information</label>
-                <input type="text" className="form-control" name="billing" value={task.billing} onChange={handleChange} placeholder="Billing info..." />
+                <label className="form-label">SKU</label>
+                <input type="text" className="form-control" name="sku" value={task.sku} onChange={handleChange} placeholder="SKU" />
               </div>
               {/* Profile Selector (for billing profile) */}
               <div className="mb-3">
