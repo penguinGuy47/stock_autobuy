@@ -1,6 +1,45 @@
-body {
-    /* background-color: #000000; Black */
-    /* Alternatively, use a dark grey: */
+body.dark-mode {
     background-color: #171717;
     color: #ffffff;
 }
+
+body.light-mode {
+    background-color: #F8FAFC;
+    color: #333333;
+}
+
+body.light-mode .bg-dark {
+    background-color: #D9EAFD !important;
+    color: #333333 !important;
+}
+
+body.light-mode .bg-secondary {
+    background-color: #BCCCDC !important;
+    color: #333333 !important;
+}
+
+body.dark-mode nav, body.dark-mode .app-navbar {
+    background-color: #s;
+    color: #ffffff;
+}
+
+body.light-mode nav, body.light-mode .app-navbar {
+    background-color: #F8FAFC;
+    color: #333333;
+}
+
+body.light-mode .list-group-item {
+    background-color: #BCCCDC;
+    color: #333333;
+}
+
+body.dark-mode nav.navbar-container {
+    background-color:rgb(2, 2, 2); 
+    color: #ffffff;
+}
+  
+body.light-mode nav.navbar-container {
+    background-color: #F8FAFC;
+    color: #333333;
+}
+  

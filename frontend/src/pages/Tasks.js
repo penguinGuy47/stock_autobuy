@@ -18,6 +18,9 @@ const Tasks = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [editingIndex, setEditingIndex] = useState(null);
+  const [showGroupModal, setShowGroupModal] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
+
 
   // 2FA related state for modal (for starting task)
   const [requireTwoFA, setRequireTwoFA] = useState(false);
@@ -44,13 +47,28 @@ const Tasks = () => {
     }
   }, []);
 
-  const createTaskGroup = () => {
-    const newGroup = prompt("Enter task group name:");
-    if (newGroup && !taskGroups.includes(newGroup)) {
-      setTaskGroups([...taskGroups, newGroup]);
-      setTasks({ ...tasks, [newGroup]: [] });
-    }
+  const openGroupModal = () => {
+    setNewGroupName("");
+    setShowGroupModal(true);
   };
+  
+  const handleCreateGroup = () => {
+    const trimmedName = newGroupName.trim();
+    if (!trimmedName) {
+      toast.error("Group name cannot be empty.");
+      return;
+    }
+    if (taskGroups.includes(trimmedName)) {
+      toast.error("Group already exists.");
+      return;
+    }
+    setTaskGroups([...taskGroups, trimmedName]);
+    setTasks({ ...tasks, [trimmedName]: [] });
+    toast.success("Task group created.");
+    setNewGroupName("");
+    setShowGroupModal(false);
+  };
+  
 
   const handleStartTask = async (index) => {
     if (!selectedGroup) return;
@@ -92,7 +110,6 @@ const Tasks = () => {
         setTasks({ ...tasks, [selectedGroup]: updatedTasks });
       } else if (response.data.status === '2FA_required') {
         updatedTasks[index].status = '2FA';
-        // Set 2FA state and open modal for 2FA submission
         setRequireTwoFA(true);
         setSessionId(response.data.session_id);
         setMethod(response.data.method);
@@ -160,11 +177,13 @@ const Tasks = () => {
       // Create new task
       const updatedTasks = tasks[selectedGroup] ? [...tasks[selectedGroup], payload] : [payload];
       setTasks({ ...tasks, [selectedGroup]: updatedTasks });
+      updatedTasks[editingIndex].status = 'New';
     } else {
       // Update existing task
       const updatedTasks = [...tasks[selectedGroup]];
       updatedTasks[editingIndex] = payload;
       setTasks({ ...tasks, [selectedGroup]: updatedTasks });
+      updatedTasks[editingIndex].status = 'Edited';
     }
     setShowModal(false);
     setEditingTask(null);
@@ -181,7 +200,7 @@ const Tasks = () => {
         {activeTab === "Tasks" ? (
           <>
             <h5>Task Groups</h5>
-            <button className="btn btn-success mb-2" onClick={createTaskGroup}>
+            <button className="btn btn-success mb-2" onClick={openGroupModal}>
               + Create Group
             </button>
             <ul className="list-group">
@@ -238,7 +257,7 @@ const Tasks = () => {
                   className="row align-items-center mb-2 bg-secondary text-white p-2 rounded"
                   key={index}
                 >
-                  <div className="col-2 text-start">{task.username}</div>
+                  <div className="col-2 text-start">{task.name}</div>
                   <div className="col-1 text-start">{task.action}</div>
                   <div className="col-2 text-start">
                     {Array.isArray(task.tickers) ? task.tickers.join(', ') : task.tickers}
@@ -341,6 +360,55 @@ const Tasks = () => {
         sessionId={sessionId}
         method={method}
       />
+      {showGroupModal && (
+        <div className="modal show d-block" role="dialog">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title text-dark">Create Task Group</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => {
+                    setShowGroupModal(false);
+                    setNewGroupName("");
+                  }}
+                ></button>
+              </div>
+              <div className="modal-body text-dark">
+                <div className="mb-3">
+                  <label className="form-label">Group Name</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={newGroupName}
+                    onChange={(e) => setNewGroupName(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    setShowGroupModal(false);
+                    setNewGroupName("");
+                  }}
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleCreateGroup}
+                >
+                  Save Group
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
