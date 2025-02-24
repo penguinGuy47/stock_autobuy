@@ -12,7 +12,7 @@ def automate_product():
         # Expecting keys: taskName (for labeling), billing (used here as the product SKU), 
         # site (e.g., "bestbuy"), and profile (an object/dict with at least 'username' and 'password')
         task_name = data.get('taskName')
-        sku = data.get('billing')  # using billing field as SKU
+        sku = data.get('sku')
         site = data.get('site')
         profile = data.get('profile')
 
