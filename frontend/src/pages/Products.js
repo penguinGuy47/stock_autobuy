@@ -54,7 +54,7 @@ const Products = () => {
 
   const handleStartProductTask = async (index) => {
     const task = products[selectedGroup.groupName][index];
-    if (!task.name || !task.billing || !task.profile) {
+    if (!task.name || !task.sku || !task.profile) {
       toast.error('Please fill in all required fields.');
       return;
     }
@@ -64,10 +64,9 @@ const Products = () => {
     setProducts({ ...products, [selectedGroup.groupName]: updatedTasks });
 
     try {
-      // Call your new backend endpoint (for example, /automate_product)
       const payload = {
         taskName: task.name,
-        billing: task.billing,
+        sku: task.sku,
         site: selectedGroup.site,
         profile: task.profile,
       };
@@ -127,7 +126,7 @@ const Products = () => {
               products[selectedGroup.groupName].map((task, index) => (
                 <div key={index} className="row align-items-center mb-2 bg-secondary text-white p-2 rounded">
                   <div className="col-3">{task.name}</div>
-                  <div className="col-3">{task.billing}</div>
+                  <div className="col-3">{task.sku}</div>
                   <div className="col-2">{selectedGroup.site}</div>
                   <div className="col-2">{task.profile}</div>
                   <div className="col-2">{task.status}</div>
