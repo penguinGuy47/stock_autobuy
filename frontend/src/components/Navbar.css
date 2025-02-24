@@ -1,0 +1,27 @@
+.navbar-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+}
+  
+.navbar-left h2 {
+    margin: 0; 
+}
+  
+.navbar-right {
+    display: flex;
+    align-items: center;
+}
+  
+.theme-toggle-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+  
