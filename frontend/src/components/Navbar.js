@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './Navbar.css'; // Or wherever you keep your CSS for the nav
+import './Navbar.css';
 
 function Navbar() {
   const [isDarkMode, setIsDarkMode] = useState(() => {
