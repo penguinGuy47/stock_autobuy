@@ -1,3 +1,4 @@
+// Sidebar.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,7 +12,9 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
     } else if (tab === "Tasks") {
       navigate("/tasks");
     } else if (tab === "Profiles") {
-      navigate("/profiles")
+      navigate("/profiles");
+    } else if (tab === "Products") {
+      navigate("/products");
     }
   };
 
@@ -31,6 +34,13 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
           style={{ cursor: "pointer" }}
         >
           Tasks
+        </li>
+        <li
+          className={`nav-item ${activeTab === "Products" ? "active" : ""}`}
+          onClick={() => handleTabClick("Products")}
+          style={{ cursor: "pointer" }}
+        >
+          Products
         </li>
         <li
           className={`nav-item ${activeTab === "Profiles" ? "active" : ""}`}
