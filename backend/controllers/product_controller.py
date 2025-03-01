@@ -9,8 +9,8 @@ logger = logging.getLogger(__name__)
 def automate_product():
     try:
         data = request.json
-        # Expecting keys: taskName (for labeling), billing (used here as the product SKU), 
-        # site (e.g., "bestbuy"), and profile (an object/dict with at least 'username' and 'password')
+        logger.info(f"Received request payload: {data}")
+
         task_name = data.get('taskName')
         sku = data.get('sku')
         site = data.get('site')
@@ -19,10 +19,13 @@ def automate_product():
         if not task_name or not sku or not site or not profile:
             return jsonify({'error': 'Missing required parameters.'}), 400
 
-        if site.lower() != 'bestbuy':
+        if not isinstance(profile, dict):
+            logger.error(f"Invalid profile format received: {profile}")
+            return jsonify({'error': 'Invalid profile format. Expected a dictionary with username and password.'}), 400
+
+        if 'bestbuy' not in site.lower():
             return jsonify({'error': f"Automation for site '{site}' is not implemented."}), 400
 
-        # Call the modified BestBuy automation function.
         response = run_product_automation(profile, sku)
         return jsonify(response), 200
 
