@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { toast } from 'react-toastify';
 import api from '../services/api';
-import { saveData, getData, removeData } from '../utils/localStorage';
+import { saveData, getData } from '../utils/localStorage';
 import ProductTaskModal from '../components/ProductTaskModal';
 import "./Tasks.css"; // reuse styling if desired
 
@@ -52,7 +52,9 @@ const Products = () => {
     setShowGroupModal(false);
   };
 
+  // Start a product task by sending data to the backend
   const handleStartProductTask = async (index) => {
+    if (!selectedGroup) return;
     const task = products[selectedGroup.groupName][index];
     if (!task.name || !task.sku || !task.profile) {
       toast.error('Please fill in all required fields.');
@@ -86,10 +88,17 @@ const Products = () => {
     }
   };
 
+  // Delete a task from the selected group
   const handleProductDelete = (index) => {
     if (!selectedGroup) return;
     const updatedTasks = products[selectedGroup.groupName].filter((_, i) => i !== index);
     setProducts({ ...products, [selectedGroup.groupName]: updatedTasks });
+  };
+
+  // Edit an existing product task
+  const openTaskModalForEdit = (index) => {
+    setEditingIndex(index);
+    setShowModal(true);
   };
 
   return (
@@ -105,10 +114,14 @@ const Products = () => {
             <li
               key={index}
               className={`list-group-item ${selectedGroup && selectedGroup.groupName === group.groupName ? "active" : ""}`}
-              style={{ cursor: "pointer", display: "flex", justifyContent: "space-between" }}
+              style={{ cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}
               onClick={() => setSelectedGroup(group)}
             >
-              {group.groupName} ({group.site})
+              <span>{group.groupName}</span>
+              <span style={{ fontSize: "0.8rem" }}>
+                {/* Optional friendly site name mapping */}
+                {group.site}
+              </span>
             </li>
           ))}
         </ul>
@@ -119,20 +132,47 @@ const Products = () => {
         {selectedGroup ? (
           <>
             <h5>Tasks in {selectedGroup.groupName}</h5>
-            <button className="btn btn-primary mb-3" onClick={() => { setEditingIndex(null); setShowModal(true); }}>
-              + Create Product Task
-            </button>
+            <div className="d-flex justify-content-between mb-3">
+              <button className="btn btn-primary" onClick={() => {
+                setEditingIndex(null);
+                setShowModal(true);
+              }}>
+                + Create Product Task
+              </button>
+              {/* Add any additional buttons here if needed */}
+            </div>
+
+            {/* Status Bar */}
+            <div className="row text-start fw-bold mb-3">
+              <div className="col-2">Task Name</div>
+              <div className="col-1">SKU</div>
+              <div className="col-3">Site</div>
+              <div className="col-2">Profile</div>
+              <div className="col-1">Status</div>
+              <div className="col-2">Actions</div>
+            </div>
+
+            {/* Task Rows */}
             {products[selectedGroup.groupName] && products[selectedGroup.groupName].length > 0 ? (
               products[selectedGroup.groupName].map((task, index) => (
                 <div key={index} className="row align-items-center mb-2 bg-secondary text-white p-2 rounded">
-                  <div className="col-3">{task.name}</div>
-                  <div className="col-3">{task.sku}</div>
-                  <div className="col-2">{selectedGroup.site}</div>
-                  <div className="col-2">{task.profile}</div>
-                  <div className="col-2">{task.status}</div>
-                  <div className="col-2">
-                    <button className="btn btn-primary btn-sm" onClick={() => handleStartProductTask(index)}>Start</button>
-                    <button className="btn btn-danger btn-sm" onClick={() => handleProductDelete(index)}>Delete</button>
+                  <div className="col-2 text-start">{task.name}</div>
+                  <div className="col-1 text-start">{task.sku}</div>
+                  <div className="col-3 text-start">{selectedGroup.site}</div>
+                  <div className="col-2 text-start">{task.profile?.username || "N/A"}</div>
+                  <div className="col-1 text-start">{task.status}</div>
+                  <div className="col-2 text-start">
+                    <div className="btn-group">
+                      <button className="btn btn-primary btn-sm" onClick={() => handleStartProductTask(index)}>
+                        Start
+                      </button>
+                      <button className="btn btn-secondary btn-sm" onClick={() => openTaskModalForEdit(index)}>
+                        Edit
+                      </button>
+                      <button className="btn btn-danger btn-sm" onClick={() => handleProductDelete(index)}>
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))
@@ -151,17 +191,21 @@ const Products = () => {
           show={showModal}
           handleClose={() => setShowModal(false)}
           handleSave={(task) => {
+            // If editing an existing task
             if (editingIndex !== null) {
               const updatedTasks = [...products[selectedGroup.groupName]];
               updatedTasks[editingIndex] = { ...task, status: 'Updated' };
               setProducts({ ...products, [selectedGroup.groupName]: updatedTasks });
             } else {
+              // Create a new task
+              const newTask = { ...task, status: 'Created' };
               setProducts({
                 ...products,
-                [selectedGroup.groupName]: [...(products[selectedGroup.groupName] || []), { ...task, status: 'Created' }],
+                [selectedGroup.groupName]: [...(products[selectedGroup.groupName] || []), newTask],
               });
             }
             setShowModal(false);
+            setEditingIndex(null);
           }}
           initialData={editingIndex !== null ? products[selectedGroup.groupName][editingIndex] : null}
           groupSite={selectedGroup.site}
@@ -169,70 +213,70 @@ const Products = () => {
       )}
 
       {/* Product Group Creation Modal */}
-        {showGroupModal && (
+      {showGroupModal && (
         <div className="modal show d-block" role="dialog">
-            <div className="modal-dialog">
+          <div className="modal-dialog">
             <div className="modal-content">
-                <div className="modal-header">
+              <div className="modal-header">
                 <h5 className="modal-title text-dark">Create Product Group</h5>
                 <button
-                    type="button"
-                    className="btn-close"
-                    onClick={() => {
+                  type="button"
+                  className="btn-close"
+                  onClick={() => {
                     setShowGroupModal(false);
                     setNewGroupName("");
                     setNewGroupSite("");
-                    }}
+                  }}
                 ></button>
-                </div>
-                <div className="modal-body text-dark">
+              </div>
+              <div className="modal-body text-dark">
                 <div className="mb-3">
-                    <label className="form-label">Group Name</label>
-                    <input
+                  <label className="form-label">Group Name</label>
+                  <input
                     type="text"
                     className="form-control"
                     value={newGroupName}
                     onChange={(e) => setNewGroupName(e.target.value)}
-                    />
+                  />
                 </div>
                 <div className="mb-3">
-                    <label className="form-label">Site</label>
-                    <select
+                  <label className="form-label">Site</label>
+                  <select
                     className="form-select"
                     value={newGroupSite}
                     onChange={(e) => setNewGroupSite(e.target.value)}
-                    >
+                  >
                     <option value="">Select Site</option>
                     <option value="https://www.bestbuy.com">BestBuy</option>
                     <option value="https://www.walmart.com">Walmart</option>
                     <option value="https://www.supremenewyork.com">Supreme</option>
-                    </select>
+                  </select>
                 </div>
-                </div>
-                <div className="modal-footer">
+              </div>
+              <div className="modal-footer">
                 <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => {
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => {
                     setShowGroupModal(false);
                     setNewGroupName("");
                     setNewGroupSite("");
-                    }}
+                  }}
                 >
-                    Close
+                  Close
                 </button>
                 <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={handleCreateGroup}
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleCreateGroup}
                 >
-                    Save Group
+                  Save Group
                 </button>
-                </div>
+              </div>
             </div>
-            </div>
+          </div>
         </div>
-        )}
+      )}
     </div>
   );
 };
