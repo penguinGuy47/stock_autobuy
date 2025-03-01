@@ -60,7 +60,7 @@ def run_product_automation(profile, sku):
             "Chrome/120.0.0.0 Safari/537.36"
         )
 
-        browser = p.chromium.launch(headless=True, args=["--disable-blink-features=AutomationControlled"])
+        browser = p.chromium.launch(headless=False, args=["--disable-blink-features=AutomationControlled"])
         try:
             if os.path.exists(session_file):
                 logger.info(f"[{email}] Loading session from {session_file}")
