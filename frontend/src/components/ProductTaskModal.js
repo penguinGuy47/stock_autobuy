@@ -12,22 +12,59 @@ const ProductTaskModal = ({ show, handleClose, handleSave, initialData, groupSit
   const [task, setTask] = useState(initialData || defaultTask);
   const [billingProfiles, setBillingProfiles] = useState([]);
 
-  // Assume billing profiles are stored in localStorage under "billingProfiles"
   useEffect(() => {
-    setBillingProfiles(getData("billingProfiles") || []);
-  }, []);
+    const allProfiles = getData("profiles") || [];
+    let siteKeyword = "";
+    if (groupSite.includes("bestbuy")) {
+      siteKeyword = "bestbuy";
+    } else if (groupSite.includes("walmart")) {
+      siteKeyword = "walmart";
+    } else if (groupSite.includes("supreme")) {
+      siteKeyword = "supreme";
+    }
+    
+    const siteSpecificProfiles = allProfiles.filter(
+      (p) => p.type === "retail" && p.retailer === siteKeyword
+    );
+    setBillingProfiles(siteSpecificProfiles);
+  }, [groupSite]);  
 
   const handleChange = (e) => {
     setTask({ ...task, [e.target.name]: e.target.value });
   };
 
+  const handleProfileChange = (e) => {
+    const selectedUsername = e.target.value;
+    if (selectedUsername) {
+      const selectedProfile = billingProfiles.find(p => p.username === selectedUsername);
+      // Store the complete profile object
+      setTask({ 
+        ...task, 
+        profile: selectedProfile 
+      });
+    } else {
+      setTask({ 
+        ...task, 
+        profile: null 
+      });
+    }
+  };
+  
   const onSave = () => {
     if (!task.name || !task.sku || !task.profile) {
       toast.error("Please fill in all required fields.");
       return;
     }
-    // Optionally, set the site from the group automatically:
-    handleSave({ ...task, site: groupSite });
+    
+    // Create a task object with the complete profile object
+    const taskToSave = {
+      ...task,
+      site: groupSite,
+      // Pass the complete profile object
+      profile: task.profile
+    };
+    
+    handleSave(taskToSave);
   };
 
   if (!show) return null;
@@ -47,17 +84,35 @@ const ProductTaskModal = ({ show, handleClose, handleSave, initialData, groupSit
               {/* Task Name */}
               <div className="mb-3">
                 <label className="form-label">Task Name</label>
-                <input type="text" className="form-control" name="name" value={task.name} onChange={handleChange} />
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  name="name" 
+                  value={task.name} 
+                  onChange={handleChange} 
+                />
               </div>
-              {/* SKU Information */}
+              {/* SKU Input */}
               <div className="mb-3">
                 <label className="form-label">SKU</label>
-                <input type="text" className="form-control" name="sku" value={task.sku} onChange={handleChange} placeholder="SKU" />
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  name="sku" 
+                  value={task.sku} 
+                  onChange={handleChange} 
+                  placeholder="Enter SKU" 
+                />
               </div>
-              {/* Profile Selector (for billing profile) */}
+              {/* Profile Selector */}
               <div className="mb-3">
                 <label className="form-label">Select Billing Profile</label>
-                <select className="form-select" name="profile" value={task.profile} onChange={handleChange}>
+                <select
+                  className="form-select"
+                  name="profile"
+                  value={task.profile?.username || ""}
+                  onChange={handleProfileChange}
+                >
                   <option value="">Select Profile</option>
                   {billingProfiles.map((profile, index) => (
                     <option key={index} value={profile.username}>
@@ -66,16 +121,28 @@ const ProductTaskModal = ({ show, handleClose, handleSave, initialData, groupSit
                   ))}
                 </select>
               </div>
-              {/* Site is already provided by the group */}
+              {/* Display Site (immutable) */}
               <div className="mb-3">
                 <label className="form-label">Site</label>
-                <input type="text" className="form-control" value={groupSite} readOnly />
+                <p className="form-control-plaintext">{groupSite}</p>
               </div>
             </form>
           </div>
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={handleClose}>Close</button>
-            <button type="button" className="btn btn-primary" onClick={onSave}>Save Task</button>
+            <button 
+              type="button" 
+              className="btn btn-secondary" 
+              onClick={handleClose}
+            >
+              Close
+            </button>
+            <button 
+              type="button" 
+              className="btn btn-primary" 
+              onClick={onSave}
+            >
+              Save Task
+            </button>
           </div>
         </div>
       </div>
