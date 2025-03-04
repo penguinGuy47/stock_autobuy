@@ -76,8 +76,6 @@
       </ul>
     </li>
   </ul>
-  
-  <h2>To Run</h2>
 
   <h2>To Run</h2>
   <ol>
