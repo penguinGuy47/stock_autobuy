@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 </head>
 <body>
-  <h1>SARA - Stock And Retail Automation (in progress)</h1>
+  <h1>SARA - Stock And Retail Automation</h1>
   <p>
     A program that can automatically buy/sell stocks and retail products in a streamlined fashion after getting input from the user.
   </p>
