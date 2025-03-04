@@ -45,6 +45,49 @@
     Make sure you have <a href="https://www.python.org/downloads/">Python</a> installed.
   </p>
 
+  <h2>Requirements</h2>
+  <p>
+    Before running SARA, install the required Python packages using the included <code>requirements.txt</code> file:
+  </p>
+  <pre><code>pip install -r requirements.txt</code></pre>
+  <p>
+    Make sure you have <a href="https://www.python.org/downloads/">Python</a> installed.
+  </p>
+
+  <h3>Additional Requirements for Fennel Integration</h3>
+  <p>The Fennel broker integration requires the following additional components:</p>
+  <ul>
+    <li><strong>Appium Server</strong>:
+      <ul>
+        <li>Install Node.js and npm: <a href="https://nodejs.org/">Download here</a></li>
+        <li>Install Appium: <code>npm install -g appium</code></li>
+        <li>Install Appium driver: <code>appium driver install uiautomator2</code></li>
+        <li>Start Appium server at <code>http://localhost:4723</code> before using Fennel integration</li>
+      </ul>
+    </li>
+    <li><strong>Android Studio</strong>:
+      <ul>
+        <li><a href="https://developer.android.com/studio">Download and install Android Studio</a></li>
+        <li>Set up Android SDK through Android Studio</li>
+        <li>Configure environment variables:
+          <ul>
+            <li>Set <code>ANDROID_HOME</code> to your Android SDK location</li>
+            <li>Add <code>%ANDROID_HOME%\platform-tools</code> to your PATH</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><strong>Android Emulator</strong>:
+      <ul>
+        <li>Use Android Studio's AVD Manager to create an emulator</li>
+        <li>The default configuration uses device name "emulator-5554"</li>
+        <li>Install the Fennel app on the emulator before running</li>
+      </ul>
+    </li>
+  </ul>
+  
+  <h2>To Run</h2>
+
   <h2>To Run</h2>
   <ol>
     <li><strong>Download</strong> the project repository.</li>
