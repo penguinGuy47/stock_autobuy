@@ -4,7 +4,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import "bootstrap/dist/css/bootstrap.min.css";
 import api from '../services/api';
 import "./Tasks.css";
-import { saveData, getData, removeData } from '../utils/localStorage';
+import { saveData, getData } from '../utils/localStorage';
 import TaskModal from '../components/TaskModal';
 
 const Tasks = () => {
@@ -105,6 +105,16 @@ const Tasks = () => {
       const response = await api.post(endpoint, payload);
   
       if (response.data.status === 'success') {
+        const newTransaction = {
+          date: new Date().toLocaleString(),
+          tickers: taskToStart.tickers,
+          action: taskToStart.action,
+          quantity: taskToStart.quantity,
+          broker: taskToStart.broker,
+          status: 'Success',
+        };
+        recordTransaction(newTransaction);
+
         updatedTasks[index].status = 'Success';
         toast.success(`${taskToStart.action} successful.`);
         setTasks({ ...tasks, [selectedGroup]: updatedTasks });
@@ -118,6 +128,16 @@ const Tasks = () => {
         setShowModal(true);
         toast.info('2FA is required.');
       }  else {
+        const failedTransaction = {
+          date: new Date().toLocaleString(),
+          tickers: taskToStart.tickers,
+          action: taskToStart.action,
+          quantity: taskToStart.quantity,
+          broker: taskToStart.broker,
+          status: 'Failed',
+        };
+        recordTransaction(failedTransaction);
+
         updatedTasks[index].status = 'Failed';
         toast.error(`${taskToStart.action} failed: ${response.data.message || 'Unknown error.'}`);
         setTasks({ ...tasks, [selectedGroup]: updatedTasks });
@@ -411,6 +431,14 @@ const Tasks = () => {
       )}
     </div>
   );
+};
+
+export const recordTransaction = (transaction) => {
+  // Retrieve existing history or initialize an empty array
+  const currentHistory = getData('transactionHistory') || [];
+  // Add the new transaction at the beginning (so the newest is first)
+  currentHistory.unshift(transaction);
+  saveData('transactionHistory', currentHistory);
 };
 
 export default Tasks;
