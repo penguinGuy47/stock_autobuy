@@ -97,7 +97,7 @@ const TaskModal = ({ show, handleClose, handleSave, initialData, requireTwoFA, s
   // Handle 2FA submission
   const handle2FASubmit = async (e) => {
     e.preventDefault();
-    if ((method === 'text' || method === 'captcha_and_text') && !twoFaCode) {
+    if ((method === 'text' || method === 'captcha_and_text' || method === 'email') && !twoFaCode) {
       toast.error('Please enter the 2FA code.');
       return;
     }
@@ -202,6 +202,7 @@ const TaskModal = ({ show, handleClose, handleSave, initialData, requireTwoFA, s
                     <option value="">Select Broker</option>
                     <option value="chase">Chase</option>
                     <option value="fidelity">Fidelity</option>
+                    <option value="fennel">Fennel</option>
                     <option value="firstrade">Firstrade</option>
                     <option value="public">Public</option>
                     <option value="schwab">Schwab</option>
