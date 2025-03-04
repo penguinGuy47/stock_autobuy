@@ -6,7 +6,7 @@
 <body>
   <h1>SARA - Stock And Retail Automation</h1>
   <p>
-    A program that can automatically buy/sell stocks and retail products in a streamlined fashion after getting input from the user.
+    SARA is a powerful automation tool that streamlines stock trading across multiple brokerages through a single interface. It enables investors to execute trades, see trading history, and automate routine transactions without switching between different trading platforms. With support for major brokers like Chase, Fidelity, and Schwab, SARA simplifies the trading experience while saving time through its task management and scheduling capabilities. Retail automation for popular sites like Bestbuy and Newegg are coming soon!
   </p>
 
   <h2>Current Features</h2>
