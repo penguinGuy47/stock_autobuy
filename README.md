@@ -36,6 +36,7 @@
   <ul>
     <li>More brokerages</li>
     <li>Headless mode</li>
+    <li>MacOS Support</li>
   </ul>
 
   <h2>Requirements</h2>
