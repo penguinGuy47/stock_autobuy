@@ -206,6 +206,7 @@ const TaskModal = ({ show, handleClose, handleSave, initialData, requireTwoFA, s
                     <option value="public">Public</option>
                     <option value="schwab">Schwab</option>
                     <option value="wells">Wells Fargo</option>
+                    <option value="robinhood">Robinhood</option>
                   </select>
                 </div>
 
@@ -260,16 +261,29 @@ const TaskModal = ({ show, handleClose, handleSave, initialData, requireTwoFA, s
             {/* 2FA Code Input */}
             {requireTwoFA && (
               <div className="mb-3">
-                <label className="form-label text-dark">2FA Code</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={twoFaCode}
-                  onChange={(e) => setTwoFaCode(e.target.value)}
-                />
-                <button className="btn btn-primary mt-2" onClick={handle2FASubmit}>
-                  Submit 2FA
-                </button>
+                {method === 'app' ? (
+                  <>
+                    <div className="alert alert-info">
+                      Please approve the authentication request in your app, then click Continue.
+                    </div>
+                    <button className="btn btn-primary" onClick={handle2FASubmit}>
+                      Continue
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <label className="form-label text-dark">2FA Code</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={twoFaCode}
+                      onChange={(e) => setTwoFaCode(e.target.value)}
+                    />
+                    <button className="btn btn-primary mt-2" onClick={handle2FASubmit}>
+                      Submit 2FA
+                    </button>
+                  </>
+                )}
               </div>
             )}
           </div>
