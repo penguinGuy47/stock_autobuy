@@ -7,6 +7,7 @@ from services.webull import buy as webull_buy
 from services.wellsfargo import buy as wells_buy, sell as wells_sell
 from services.public import buy as public_buy, sell as public_sell
 from services.robinhood import buy as robinhood_buy, sell as robinhood_sell
+from services.fennel import buy as fennel_buy, sell as fennel_sell, complete_2fa_and_trade as fennel_complete_2fa_and_trade
 import logging
 
 import os
@@ -27,6 +28,7 @@ BROKER_SERVICES = {
     'webull': {'buy': webull_buy},
     'wells': {'buy': wells_buy, 'sell': wells_sell},
     'robinhood': {'buy': robinhood_buy, 'sell': robinhood_sell},
+    'fennel': {'buy': fennel_buy, 'sell': fennel_sell},
 }
 
 @trade_bp.route('/buy', methods=['POST'])
@@ -109,6 +111,7 @@ def complete_2fa_endpoint():
         from services.webull import two_fa_sessions as webull_two_fa_sessions, complete_2fa_and_trade as webull_complete_2fa_and_trade
         from services.public import two_fa_sessions as public_two_fa_sessions, complete_2fa_and_trade as public_complete_2fa_and_trade
         from services.robinhood import two_fa_sessions as rh_two_fa_sessions, complete_2fa_and_trade as rh_complete_2fa_and_trade
+        from services.fennel import two_fa_sessions as fennel_two_fa_sessions, complete_2fa_and_trade as fennel_complete_2fa_and_trade
 
         logger.info(f"Received session ID for 2FA completion: {session_id}")
 
@@ -149,6 +152,11 @@ def complete_2fa_endpoint():
             )
         elif session_id in rh_two_fa_sessions:
             trade_response = rh_complete_2fa_and_trade(
+                session_id=session_id,
+                two_fa_code=two_fa_code
+            )
+        elif session_id in fennel_two_fa_sessions:
+            trade_response = fennel_complete_2fa_and_trade(
                 session_id=session_id,
                 two_fa_code=two_fa_code
             )
