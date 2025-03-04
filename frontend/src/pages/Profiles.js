@@ -200,6 +200,7 @@ const Profiles = () => {
                         <option value="schwab">Schwab</option>
                         <option value="firstrade">Firstrade</option>
                         <option value="wells">Wells Fargo</option>
+                        <option value="robinhood">Robinhood</option>
                       </select>
                     </div>
                   )}
