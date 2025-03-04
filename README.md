@@ -45,15 +45,6 @@
     Make sure you have <a href="https://www.python.org/downloads/">Python</a> installed.
   </p>
 
-  <h2>Requirements</h2>
-  <p>
-    Before running SARA, install the required Python packages using the included <code>requirements.txt</code> file:
-  </p>
-  <pre><code>pip install -r requirements.txt</code></pre>
-  <p>
-    Make sure you have <a href="https://www.python.org/downloads/">Python</a> installed.
-  </p>
-
   <h3>Additional Requirements for Fennel Integration</h3>
   <p>The Fennel broker integration requires the following additional components:</p>
   <ul>
