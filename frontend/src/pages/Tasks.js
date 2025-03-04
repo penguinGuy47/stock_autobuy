@@ -82,7 +82,7 @@ const Tasks = () => {
       !taskToStart.quantity ||
       !taskToStart.action ||
       !taskToStart.username ||
-      !taskToStart.password
+      (!taskToStart.password && taskToStart.broker !== 'fennel') // Skip password check for Fennel
     ) {
       toast.error('Please fill in all required fields.');
       return;
@@ -195,15 +195,14 @@ const Tasks = () => {
     if (!selectedGroup) return;
     if (editingIndex === null) {
       // Create new task
-      const updatedTasks = tasks[selectedGroup] ? [...tasks[selectedGroup], payload] : [payload];
+      const newTask = {...payload, status: 'New'};
+      const updatedTasks = tasks[selectedGroup] ? [...tasks[selectedGroup], newTask] : [newTask];
       setTasks({ ...tasks, [selectedGroup]: updatedTasks });
-      updatedTasks[editingIndex].status = 'New';
     } else {
       // Update existing task
       const updatedTasks = [...tasks[selectedGroup]];
-      updatedTasks[editingIndex] = payload;
+      updatedTasks[editingIndex] = {...payload, status: 'Edited'};
       setTasks({ ...tasks, [selectedGroup]: updatedTasks });
-      updatedTasks[editingIndex].status = 'Edited';
     }
     setShowModal(false);
     setEditingTask(null);
