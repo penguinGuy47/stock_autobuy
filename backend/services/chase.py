@@ -255,11 +255,13 @@ def navigate_to_dashboard(driver):
         logger.info(f"Failed to navigate to dashboard: {e}")
 
 def buy(tickers, dir, prof, trade_share_count, username, password, two_fa_code=None):
+    """
+    Initiates a buy operation for the specified tickers and quantity.
+    """
     logger.info(f"Initiating buy operation for {trade_share_count} shares of {tickers} by user {username}")
     driver, temp_dir = start_regular_driver(dir, prof)
     try:
         driver.get("https://secure.chase.com/web/auth/dashboard#/dashboard/overviewAccounts/overview/index")
-
         login_response = login(driver, temp_dir, username, password)
 
         if login_response['status'] == '2FA_required':

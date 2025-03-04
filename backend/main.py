@@ -15,7 +15,7 @@ def main():
     BUY_TICKERS = ['AMC','NIO']
 
     chrome_path = r"C:\Users\kaile\AppData\Local\Google\Chrome\User Data" # add the path to your chrome
-    chrome_profile = r"Profile 5" # chawddnge this accordingly
+    chrome_profile = r"Profile 5" # change this accordingly
 
 
     webull_buy(BUY_TICKERS, chrome_path, chrome_profile, 1, '9173858088', 'password')
