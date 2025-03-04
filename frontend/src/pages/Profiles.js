@@ -40,8 +40,13 @@ const Profiles = () => {
       return;
     }
     if (newProfile.type === "broker") {
-      if (!newProfile.broker || !newProfile.username || !newProfile.password) {
-        toast.error("Please fill in all the fields for a broker profile.");
+      if (!newProfile.broker || !newProfile.username) {
+        toast.error("Please fill in all the required fields for a broker profile.");
+        return;
+      }
+      // Only check password for brokers other than Fennel
+      if (newProfile.broker !== "fennel" && !newProfile.password) {
+        toast.error("Please enter a password for this broker.");
         return;
       }
     } else if (newProfile.type === "retail") {
@@ -49,6 +54,11 @@ const Profiles = () => {
         toast.error("Please fill in all the fields for a retail profile.");
         return;
       }
+    }
+
+    // If it's Fennel, ensure we have an empty password rather than undefined
+    if (newProfile.broker === "fennel") {
+      newProfile.password = "";
     }
 
     if (editingIndex !== null) {
@@ -197,8 +207,9 @@ const Profiles = () => {
                         <option value="">Select Broker</option>
                         <option value="chase">Chase</option>
                         <option value="fidelity">Fidelity</option>
-                        <option value="schwab">Schwab</option>
+                        <option value="fennel">Fennel</option>
                         <option value="firstrade">Firstrade</option>
+                        <option value="schwab">Schwab</option>
                         <option value="wells">Wells Fargo</option>
                         <option value="robinhood">Robinhood</option>
                       </select>
@@ -239,20 +250,22 @@ const Profiles = () => {
                     />
                   </div>
 
-                  {/* Password */}
-                  <div className="mb-3">
-                    <label htmlFor="passwordInput" className="form-label">
-                      Password
-                    </label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      id="passwordInput"
-                      name="password"
-                      value={newProfile.password}
-                      onChange={handleInputChange}
-                    />
-                  </div>
+                  {/* Password - hide for Fennel */}
+                  {(newProfile.type !== "broker" || newProfile.broker !== "fennel") && (
+                    <div className="mb-3">
+                      <label htmlFor="passwordInput" className="form-label">
+                        Password
+                      </label>
+                      <input
+                        type="password"
+                        className="form-control"
+                        id="passwordInput"
+                        name="password"
+                        value={newProfile.password}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  )}
                 </form>
               </div>
               <div className="modal-footer">
