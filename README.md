@@ -6,7 +6,7 @@
 <body>
   <h1>SARA - Stock And Retail Automation</h1>
   <p>
-    SARA is a powerful automation tool that streamlines stock trading across multiple brokerages through a single interface. It enables investors to execute trades, see trading history, and automate routine transactions without switching between different trading platforms. With support for major brokers like Chase, Fidelity, and Schwab, SARA simplifies the trading experience while saving time through its task management and scheduling capabilities. Retail automation for popular sites like Bestbuy and Newegg are coming soon!
+    SARA is a powerful automation tool that streamlines stock trading across multiple brokerages through a single interface. It enables users to execute trades, see trading history, and automate routine transactions without switching between different trading platforms. With support for major brokers like Chase, Fidelity, and Schwab, SARA simplifies the trading experience while saving time through its task management and scheduling capabilities. Retail automation for popular sites like Bestbuy and Newegg are coming soon!
   </p>
 
   <h2>Current Features</h2>
