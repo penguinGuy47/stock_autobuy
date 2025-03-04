@@ -240,6 +240,9 @@ def complete_2fa_and_trade(session_id, two_fa_code=None):
         return {'status': 'error', 'message': 'An error occurred during 2FA completion and trade.', 'error': str(e)}
 
 def buy(tickers, dir, prof, trade_share_count, username, password, two_fa_code=None):
+    """
+    Initiates a buy operation for the specified ticker and quantity.
+    """
     logger.info(f"Initiating buy operation for {trade_share_count} shares of {tickers} by user {username}")
     driver, temp_dir = start_regular_driver(dir, prof)
 
