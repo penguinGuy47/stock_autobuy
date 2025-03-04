@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>SARA - Stock And Retail Automation (in progress)</title>
 </head>
 <body>
   <h1>SARA - Stock And Retail Automation (in progress)</h1>
