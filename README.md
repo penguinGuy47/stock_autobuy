@@ -17,13 +17,16 @@
     <li>Real-time updates</li>
     <li>Broker support:
       <ul>
-        <li>Fidelity</li>
-        <li>Chase</li>
-        <li>Schwab</li>
-        <li>Firstrade</li>
-        <li>Wells Fargo</li>
-        <li>Public</li>
+        <li>Chase 🟢</li>
+        <li>Fennel 🔵</li>
+        <li>Fidelity 🟢</li>
+        <li>Firstrade 🔴</li>
+        <li>Public 🟡</li>
+        <li>Robinhood 🔵</li>
+        <li>Schwab 🟢</li>
+        <li>Wells Fargo 🟢</li>
       </ul>
+      <p><strong>Legend:</strong> 🟢 = Working, 🟡 = Experiencing Issues, 🔴 = Down, 🔵 = In progress</p>
     </li>
   </ul>
 
