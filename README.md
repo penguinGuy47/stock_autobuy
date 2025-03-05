@@ -4,9 +4,11 @@
   <meta charset="UTF-8">
 </head>
 <body>
-  <h1>SARA - Stock And Retail Automation (in progress)</h1>
+  <h1>SARA - Stock And Retail Automation</h1>
   <p>
-    A program that can automatically buy/sell stocks and retail products in a streamlined fashion after getting input from the user.
+    SARA is a powerful automation tool that streamlines stock trading across multiple brokerages through a single interface. It enables users to execute trades, see trading history, and automate routine transactions without switching between different trading platforms. With support for major brokers like Chase, Fidelity, and Schwab, SARA simplifies the trading experience while saving time through its task management and scheduling capabilities. 
+
+*Retail automation for popular sites like Bestbuy and Newegg are coming soon*
   </p>
 
   <h2>Current Features</h2>
@@ -17,13 +19,16 @@
     <li>Real-time updates</li>
     <li>Broker support:
       <ul>
-        <li>Fidelity</li>
-        <li>Chase</li>
-        <li>Schwab</li>
-        <li>Firstrade</li>
-        <li>Wells Fargo</li>
-        <li>Public</li>
+        <li>Chase 🟢</li>
+        <li>Fennel 🔵</li>
+        <li>Fidelity 🟢</li>
+        <li>Firstrade 🔴</li>
+        <li>Public 🟡</li>
+        <li>Robinhood 🔵</li>
+        <li>Schwab 🟢</li>
+        <li>Wells Fargo 🟢</li>
       </ul>
+      <p><strong>Legend:</strong> 🟢 = Working, 🟡 = Experiencing Issues, 🔴 = Down, 🔵 = In progress</p>
     </li>
   </ul>
 
@@ -31,6 +36,7 @@
   <ul>
     <li>More brokerages</li>
     <li>Headless mode</li>
+    <li>MacOS Support</li>
   </ul>
 
   <h2>Requirements</h2>
@@ -41,6 +47,38 @@
   <p>
     Make sure you have <a href="https://www.python.org/downloads/">Python</a> installed.
   </p>
+
+  <h3>Additional Requirements for Fennel Integration</h3>
+  <p>The Fennel broker integration requires the following additional components:</p>
+  <ul>
+    <li><strong>Appium Server</strong>:
+      <ul>
+        <li>Install Node.js and npm: <a href="https://nodejs.org/">Download here</a></li>
+        <li>Install Appium: <code>npm install -g appium</code></li>
+        <li>Install Appium driver: <code>appium driver install uiautomator2</code></li>
+        <li>Start Appium server at <code>http://localhost:4723</code> before using Fennel integration</li>
+      </ul>
+    </li>
+    <li><strong>Android Studio</strong>:
+      <ul>
+        <li><a href="https://developer.android.com/studio">Download and install Android Studio</a></li>
+        <li>Set up Android SDK through Android Studio</li>
+        <li>Configure environment variables:
+          <ul>
+            <li>Set <code>ANDROID_HOME</code> to your Android SDK location</li>
+            <li>Add <code>%ANDROID_HOME%\platform-tools</code> to your PATH</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><strong>Android Emulator</strong>:
+      <ul>
+        <li>Use Android Studio's AVD Manager to create an emulator</li>
+        <li>The default configuration uses device name "emulator-5554"</li>
+        <li>Install the Fennel app on the emulator before running</li>
+      </ul>
+    </li>
+  </ul>
 
   <h2>To Run</h2>
   <ol>
