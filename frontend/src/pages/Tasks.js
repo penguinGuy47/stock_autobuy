@@ -82,7 +82,7 @@ const Tasks = () => {
       !taskToStart.quantity ||
       !taskToStart.action ||
       !taskToStart.username ||
-      (!taskToStart.password && taskToStart.broker !== 'fennel') // Skip password check for Fennel
+      (taskToStart.broker !== 'fennel' && !taskToStart.password)
     ) {
       toast.error('Please fill in all required fields.');
       return;
@@ -203,6 +203,7 @@ const Tasks = () => {
       const updatedTasks = [...tasks[selectedGroup]];
       updatedTasks[editingIndex] = {...payload, status: 'Edited'};
       setTasks({ ...tasks, [selectedGroup]: updatedTasks });
+      updatedTasks[editingIndex].status = 'Edited';
     }
     setShowModal(false);
     setEditingTask(null);

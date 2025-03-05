@@ -10,9 +10,8 @@ const Profiles = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null); // Track which profile is being edited
   const [newProfile, setNewProfile] = useState({
-    type: "", // "broker" or "retail"
-    broker: "",   // used when type is broker
-    retailer: "", // used when type is retail
+    type: "broker", // Only broker type now
+    broker: "",
     username: "",
     password: "",
   });
@@ -28,32 +27,17 @@ const Profiles = () => {
     setNewProfile({ ...newProfile, [name]: value });
   };
 
-  const handleTypeChange = (e) => {
-    const value = e.target.value; // "broker" or "retail"
-    setNewProfile({ ...newProfile, type: value, broker: "", retailer: "" });
-  };
-
   const createOrEditProfile = () => {
-    // Validate required fields based on profile type
-    if (!newProfile.type) {
-      toast.error("Please select a profile type.");
+    // Validate required fields
+    if (!newProfile.broker || !newProfile.username) {
+      toast.error("Please fill in all the required fields for a broker profile.");
       return;
     }
-    if (newProfile.type === "broker") {
-      if (!newProfile.broker || !newProfile.username) {
-        toast.error("Please fill in all the required fields for a broker profile.");
-        return;
-      }
-      // Only check password for brokers other than Fennel
-      if (newProfile.broker !== "fennel" && !newProfile.password) {
-        toast.error("Please enter a password for this broker.");
-        return;
-      }
-    } else if (newProfile.type === "retail") {
-      if (!newProfile.retailer || !newProfile.username || !newProfile.password) {
-        toast.error("Please fill in all the fields for a retail profile.");
-        return;
-      }
+    
+    // Only check password for brokers other than Fennel
+    if (newProfile.broker !== "fennel" && !newProfile.password) {
+      toast.error("Please enter a password for this broker.");
+      return;
     }
 
     // If it's Fennel, ensure we have an empty password rather than undefined
@@ -91,9 +75,8 @@ const Profiles = () => {
 
   const resetForm = () => {
     setNewProfile({
-      type: "",
+      type: "broker",
       broker: "",
-      retailer: "",
       username: "",
       password: "",
     });
@@ -102,7 +85,7 @@ const Profiles = () => {
 
   return (
     <div className="container p-3">
-      <h3>Profiles</h3>
+      <h3>Broker Profiles</h3>
       <button
         className="btn btn-success mb-3"
         onClick={() => {
@@ -118,15 +101,9 @@ const Profiles = () => {
             className="list-group-item d-flex justify-content-between align-items-center"
             key={index}
           >
-            {profile.type === "broker" ? (
-              <span>
-                Broker ({profile.broker}): {profile.username}
-              </span>
-            ) : (
-              <span>
-                Retail ({profile.retailer}): {profile.username}
-              </span>
-            )}
+            <span>
+              Broker ({profile.broker}): {profile.username}
+            </span>
             <div>
               <button
                 className="btn btn-secondary btn-sm me-2"
@@ -162,78 +139,28 @@ const Profiles = () => {
               </div>
               <div className="modal-body">
                 <form>
-                  {/* Profile Type */}
-                  <div className="mb-3 form-label">
-                    <label className="mb-2">Profile Type</label>
-                    <div>
-                      <input
-                        type="radio"
-                        id="brokerType"
-                        name="type"
-                        value="broker"
-                        checked={newProfile.type === "broker"}
-                        onChange={handleTypeChange}
-                      />
-                      <label htmlFor="brokerType" className="ms-2 me-3">
-                        Broker
-                      </label>
-                      <input
-                        type="radio"
-                        id="retailType"
-                        name="type"
-                        value="retail"
-                        checked={newProfile.type === "retail"}
-                        onChange={handleTypeChange}
-                      />
-                      <label htmlFor="retailType" className="ms-2">
-                        Retail
-                      </label>
-                    </div>
+                  {/* Broker Selection */}
+                  <div className="mb-3">
+                    <label htmlFor="brokerSelect" className="form-label">
+                      Select Broker
+                    </label>
+                    <select
+                      id="brokerSelect"
+                      className="form-select"
+                      name="broker"
+                      value={newProfile.broker}
+                      onChange={handleInputChange}
+                    >
+                      <option value="">Select Broker</option>
+                      <option value="chase">Chase</option>
+                      <option value="fidelity">Fidelity</option>
+                      <option value="fennel">Fennel</option>
+                      <option value="firstrade">Firstrade</option>
+                      <option value="schwab">Schwab</option>
+                      <option value="wells">Wells Fargo</option>
+                      <option value="robinhood">Robinhood</option>
+                    </select>
                   </div>
-
-                  {/* Conditional Field: Broker or Retailer */}
-                  {newProfile.type === "broker" && (
-                    <div className="mb-3">
-                      <label htmlFor="brokerSelect" className="form-label">
-                        Select Broker
-                      </label>
-                      <select
-                        id="brokerSelect"
-                        className="form-select"
-                        name="broker"
-                        value={newProfile.broker}
-                        onChange={handleInputChange}
-                      >
-                        <option value="">Select Broker</option>
-                        <option value="chase">Chase</option>
-                        <option value="fidelity">Fidelity</option>
-                        <option value="fennel">Fennel</option>
-                        <option value="firstrade">Firstrade</option>
-                        <option value="schwab">Schwab</option>
-                        <option value="wells">Wells Fargo</option>
-                        <option value="robinhood">Robinhood</option>
-                      </select>
-                    </div>
-                  )}
-                  {newProfile.type === "retail" && (
-                    <div className="mb-3">
-                      <label htmlFor="retailerSelect" className="form-label">
-                        Select Retailer
-                      </label>
-                      <select
-                        id="retailerSelect"
-                        className="form-select"
-                        name="retailer"
-                        value={newProfile.retailer}
-                        onChange={handleInputChange}
-                      >
-                        <option value="">Select Retailer</option>
-                        <option value="bestbuy">BestBuy</option>
-                        <option value="walmart">Walmart</option>
-                        <option value="supreme">Supreme</option>
-                      </select>
-                    </div>
-                  )}
 
                   {/* Username */}
                   <div className="mb-3">
@@ -251,7 +178,7 @@ const Profiles = () => {
                   </div>
 
                   {/* Password - hide for Fennel */}
-                  {(newProfile.type !== "broker" || newProfile.broker !== "fennel") && (
+                  {newProfile.broker !== "fennel" && (
                     <div className="mb-3">
                       <label htmlFor="passwordInput" className="form-label">
                         Password
