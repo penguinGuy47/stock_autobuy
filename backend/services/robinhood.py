@@ -27,7 +27,6 @@ def login(driver, tempdir, username, password):
     
     # Apply enhanced protections
     enhance_fingerprint_protection(driver)
-    normalize_network_patterns(driver)
     improve_session_management(driver)
 
     try:
@@ -37,7 +36,11 @@ def login(driver, tempdir, username, password):
         )
         
         # Natural mouse movement to username field
-        natural_mouse_movement(driver, end_element=username_field, duration=random.uniform(0.8, 1.5))
+        try:
+            natural_mouse_movement(driver, end_element=username_field, duration=random.uniform(0.8, 1.5))
+        except Exception as e:
+            logger.warning(f"Mouse movement failed, using JavaScript fallback: {e}")
+            driver.execute_script("arguments[0].focus();", username_field)
         very_short_sleep()
         
         # More realistic typing
