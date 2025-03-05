@@ -8,7 +8,6 @@ import Sidebar from './components/Sidebar';
 import Profiles from './pages/Profiles'
 import Tasks from './pages/Tasks';
 import Dashboard from './pages/Dashboard';
-import Products from './pages/Products';
 
 function App() {
   const [activeTab, setActiveTab] = useState("Dashboard");
@@ -22,7 +21,6 @@ function App() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/tasks" element={<Tasks />} />
-            <Route path="/products" element={<Products />} />
             <Route path="/profiles" element={<Profiles />}/>
           </Routes>
         </div>

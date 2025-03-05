@@ -35,13 +35,6 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
           Tasks
         </li>
         <li
-          className={`nav-item ${activeTab === "Products" ? "active" : ""}`}
-          onClick={() => handleTabClick("Products")}
-          style={{ cursor: "pointer" }}
-        >
-          Products
-        </li>
-        <li
           className={`nav-item ${activeTab === "Profiles" ? "active" : ""}`}
           onClick={() => handleTabClick("Profiles")}
           style={{ cursor: "pointer"}}
