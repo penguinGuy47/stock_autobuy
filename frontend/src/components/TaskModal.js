@@ -202,12 +202,12 @@ const TaskModal = ({ show, handleClose, handleSave, initialData, requireTwoFA, s
                     <option value="">Select Broker</option>
                     <option value="chase">Chase</option>
                     <option value="fidelity">Fidelity</option>
-                    <option value="fennel">Fennel</option>
                     <option value="firstrade">Firstrade</option>
                     <option value="public">Public</option>
                     <option value="schwab">Schwab</option>
                     <option value="wells">Wells Fargo</option>
                     <option value="robinhood">Robinhood</option>
+                    <option value="fennel">Fennel</option>
                   </select>
                 </div>
 
