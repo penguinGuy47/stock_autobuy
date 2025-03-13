@@ -96,7 +96,9 @@
     <li>
       <strong>Run the application:</strong> Double-click <code>start.bat</code> to start
     </li>
-    REMINDER: Before starting a fennel task, open up a terminal and run "appium --base-path=/wd/hub"
+    <li>
+      Before starting a fennel task, open up a terminal and run "appium --base-path=/wd/hub"
+    </li>
   </ol>
 </body>
 </html>
