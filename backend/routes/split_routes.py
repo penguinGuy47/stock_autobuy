@@ -11,7 +11,24 @@ splits_bp = Blueprint('splits', __name__)
 
 @splits_bp.route('/splits/reverse-splits', methods=['GET'])
 def get_reverse_splits():
-    """API endpoint to get reverse splits data with support for incremental updates"""
+    """
+    API endpoint to get reverse splits data with support for incremental updates.
+    
+    This endpoint accepts GET requests and returns data about reverse stock splits.
+    It supports incremental updates by accepting existing symbols as a query parameter.
+    
+    Query Parameters:
+        existing (optional): Comma-separated list of existing symbols to check for updates
+        
+    Returns:
+        JSON response containing:
+            - success: Boolean indicating if request was successful
+            - data: List of reverse split information
+            - message: Status message
+        HTTP status code:
+            - 200: Success
+            - 500: Server error
+    """
     logger.info(f"Received reverse splits request: {request.url}")
     logger.info(f"Query parameters: {request.args}")
 
