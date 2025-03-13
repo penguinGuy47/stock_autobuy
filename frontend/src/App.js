@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import './App.css';
 import Navbar from './components/Navbar';
-import Footer from './components/Footer';
 import Sidebar from './components/Sidebar';
+import Layout from './components/Layout';
 import Profiles from './pages/Profiles'
 import Tasks from './pages/Tasks';
 import Dashboard from './pages/Dashboard';
@@ -14,18 +15,21 @@ function App() {
 
   return (
     <Router>
-      <Navbar />
-      <div className="d-flex mt-2" style={{ height: "100vh" }}>
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-        <div className="flex-grow-1 d-flex flex-column">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/tasks" element={<Tasks />} />
-            <Route path="/profiles" element={<Profiles />}/>
-          </Routes>
+      <div className="d-flex flex-column" style={{ minHeight: "100vh" }}>
+        <Navbar />
+        <div className="d-flex flex-grow-1">
+          <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+          <div className="flex-grow-1 d-flex flex-column">
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/tasks" element={<Tasks />} />
+                <Route path="/profiles" element={<Profiles />}/>
+              </Routes>
+            </Layout>
+          </div>
         </div>
       </div>
-      <Footer />
       <ToastContainer />
     </Router>
   );

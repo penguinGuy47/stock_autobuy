@@ -1,3 +1,9 @@
+:root {
+  --footer-height: 50px;
+  --footer-padding: 10px;
+}
+
+/* Theme modes */
 body.dark-mode {
     background-color: #171717;
     color: #ffffff;
@@ -8,6 +14,7 @@ body.light-mode {
     color: #333333;
 }
 
+/* Light mode overrides */
 body.light-mode .bg-dark {
     background-color: #D9EAFD !important;
     color: #333333 !important;
@@ -18,28 +25,46 @@ body.light-mode .bg-secondary {
     color: #333333 !important;
 }
 
-body.dark-mode nav, body.dark-mode .app-navbar {
-    background-color: #s;
-    color: #ffffff;
-}
-
-body.light-mode nav, body.light-mode .app-navbar {
-    background-color: #F8FAFC;
-    color: #333333;
-}
-
 body.light-mode .list-group-item {
     background-color: #BCCCDC;
     color: #333333;
 }
 
+/* Navbar styles */
 body.dark-mode nav.navbar-container {
-    background-color:rgb(2, 2, 2); 
+    background-color: rgb(2, 2, 2); 
     color: #ffffff;
 }
   
 body.light-mode nav.navbar-container {
     background-color: #F8FAFC;
     color: #333333;
+}
+
+.app-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: var(--footer-height);
+  padding: var(--footer-padding);
+  background-color: #212529;
+  color: #fff;
+  text-align: center;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.app-footer p {
+  margin: 0;
+  padding: 0;
+}
+
+/* Layout utilities */
+.footer-spacer {
+  height: var(--footer-height);
+  width: 100%;
 }
   
