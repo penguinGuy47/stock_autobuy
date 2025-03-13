@@ -15,14 +15,16 @@
     <li>Profiles</li>
     <li>Task management</li>
     <li>
-      <ul>Dashboard
-        <li>
-          Transaction History
-        </li>
-        <li>
-          Upcoming Splits (WIP)
-        </li>
-      </ul>
+      <li>Dashboard
+        <ul>
+          <li>
+            Transaction History
+          </li>
+          <li>
+            Upcoming Splits (WIP)
+          </li>
+        </ul>
+      </li>
     </li>
     <li>Broker support:
       <ul>
