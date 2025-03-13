@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { saveData, getData } from "../utils/localStorage";
 import "./Profiles.css";
+import FooterSpacer from "../components/FooterSpacer";
 
 const Profiles = () => {
   const formKey = "profiles";
@@ -84,7 +85,7 @@ const Profiles = () => {
   };
 
   return (
-    <div className="container p-3">
+    <div className="container-fluid p-3">
       <h3>Broker Profiles</h3>
       <button
         className="btn btn-success mb-3"
@@ -122,6 +123,8 @@ const Profiles = () => {
         ))}
       </ul>
 
+      <FooterSpacer />
+
       {/* Modal for Creating/Editing a Profile */}
       {showModal && (
         <div className="modal show d-block" role="dialog">
@@ -156,6 +159,7 @@ const Profiles = () => {
                       <option value="fidelity">Fidelity</option>
                       <option value="fennel">Fennel</option>
                       <option value="firstrade">Firstrade</option>
+                      <option value="public">Public</option>
                       <option value="schwab">Schwab</option>
                       <option value="wells">Wells Fargo</option>
                       <option value="robinhood">Robinhood</option>
