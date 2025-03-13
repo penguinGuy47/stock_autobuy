@@ -81,7 +81,7 @@
     <li><strong>Android Emulator</strong>:
       <ul>
         <li>Use Android Studio's AVD Manager to create an emulator</li>
-        <li>The default configuration uses device name "emulator-5554" (use the command "adb devices" to ensure its running)</li>
+        <li>The default configuration uses device name "emulator-5554" (use the command <code>adb devices</code> to ensure its running)</li>
         <li>Install the Fennel app on the emulator before running</li>
       </ul>
     </li>
