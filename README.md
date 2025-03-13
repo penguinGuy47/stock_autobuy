@@ -4,11 +4,9 @@
   <meta charset="UTF-8">
 </head>
 <body>
-  <h1>SARA - Stock And Retail Automation</h1>
+  <h1>Autotrade - Stock Automation</h1>
   <p>
-    SARA is a powerful automation tool that streamlines stock trading across multiple brokerages through a single interface. It enables users to execute trades, see trading history, and automate routine transactions without switching between different trading platforms. With support for major brokers like Chase, Fidelity, and Schwab, SARA simplifies the trading experience while saving time through its task management and scheduling capabilities. 
-
-*Retail automation for popular sites like Bestbuy and Newegg are coming soon*
+    Autotrade is a powerful automation tool that streamlines stock trading across multiple brokerages through a single interface. It enables users to execute trades, see trading history, and automate routine transactions without switching between different trading platforms. With support for major brokers like Chase, Fidelity, and Schwab, Autotrade simplifies the trading experience while saving time through its task management and scheduling capabilities. 
   </p>
 
   <h2>Current Features</h2>
@@ -23,7 +21,7 @@
         <li>Fennel 🔵</li>
         <li>Fidelity 🟢</li>
         <li>Firstrade 🔴</li>
-        <li>Public 🟡</li>
+        <li>Public 🟢</li>
         <li>Robinhood 🔵</li>
         <li>Schwab 🟢</li>
         <li>Wells Fargo 🟢</li>
@@ -74,8 +72,9 @@
     <li><strong>Android Emulator</strong>:
       <ul>
         <li>Use Android Studio's AVD Manager to create an emulator</li>
-        <li>The default configuration uses device name "emulator-5554"</li>
+        <li>The default configuration uses device name "emulator-5554" (use the command "adb devices" to ensure its running)</li>
         <li>Install the Fennel app on the emulator before running</li>
+        <li>Before starting a fennel task, open up a terminal and run "appium --base-path=/wd/hub"
       </ul>
     </li>
   </ul>
