@@ -96,7 +96,7 @@ def buy(tickers, dir, prof, trade_share_count, username, password, two_fa_code=N
 
 def buy_after_login(driver, tickers, trade_share_count):
 
-    enterTradeTicket(driver)    # Click on brokerage overview
+    # enterTradeTicket(driver) 
     navigate_to_trade(driver)
     initiate_account_selection(driver)
 
@@ -140,7 +140,7 @@ def buy_after_login(driver, tickers, trade_share_count):
                     order_url = driver.current_url
                     try:
                         select_action = WebDriverWait(driver, 10).until(
-                            EC.element_to_be_clickable((By.XPATH, '//*[@id="BuySellBtn"]'))
+                            EC.element_to_be_clickable((By.ID, 'BuySellBtn'))
                         )
                         select_action.click()
 
@@ -172,22 +172,22 @@ def conduct_trade(driver, ticker, trade_share_count, trade_type):
             select_action.click()
 
         ticker_input = wait.until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="Symbol"]'))
+            EC.element_to_be_clickable((By.ID, 'Symbol'))
         )
         human_type(ticker, ticker_input)
         ticker_input.send_keys(Keys.ENTER)
 
         share_qty = wait.until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="OrderQuantity"]'))
+            EC.element_to_be_clickable((By.ID, 'OrderQuantity'))
         )
         driver.execute_script("arguments[0].scrollIntoView(true);", share_qty)
-        very_short_sleep()
-
+        short_sleep()
         human_type(str(trade_share_count), share_qty)
+
         very_short_sleep()
 
         order_type = wait.until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="OrderTypeBtnText"]'))
+            EC.element_to_be_clickable((By.ID, "OrderTypeBtnText"))
         )
         order_type.click()
 
@@ -208,25 +208,26 @@ def conduct_trade(driver, ticker, trade_share_count, trade_type):
 
         current_price = f"{price_as_float:.2f}"  # Format back to string with 2 decimal places
         limit_input = wait.until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="Price"]'))
+            EC.element_to_be_clickable((By.ID, 'Price'))
         )
         human_type(current_price, limit_input)
         very_short_sleep()
 
         timing_select = wait.until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="TIFBtnText"]'))
+            EC.element_to_be_clickable((By.ID, 'TIFBtnText'))
         )
         timing_select.click()
         very_short_sleep()
 
         day_select = wait.until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="eqentryfrm"]/div/div[1]/div[5]/div/div[2]/div/ul/li[1]/a'))
+            EC.element_to_be_clickable((By.CSS_SELECTOR, "a[data-val='Day']"))
         )
+
         day_select.click()
         very_short_sleep()
 
         preview_button = wait.until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="actionbtnContinue"]'))
+            EC.element_to_be_clickable((By.ID, 'actionbtnContinue'))
         )
         preview_button.click()
         very_short_sleep()
@@ -244,29 +245,15 @@ def conduct_trade(driver, ticker, trade_share_count, trade_type):
     except:
         logger.info("Error conducting trade...")
 
-def enterTradeTicket(driver):
-    try:
-        logger.info("Initiating buy...")
-        portfolio_tab = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="MrA7JYMdjr"]/a'))
-        )
-        portfolio_tab.click()
-
-        trade_tab = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="gotrading"]'))
-        )
-        trade_tab.click()
-    except:
-        logger.error("Error entering trade ticket")
 
 def navigate_to_trade(driver):
+
     try:
         brokerage_button = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, '//*[@id="BROKERAGE_LINK7P"]'))
         )
 
         brokerage_button.click()
-        rand_sleep()
     except:
         logger.info("Error clicking on brokerage tab")
 
@@ -282,7 +269,7 @@ def initiate_account_selection(driver):
 
         very_short_sleep()
         trademenu_button =  WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="gotrading"]'))
+            EC.element_to_be_clickable((By.ID, 'gotrading'))
         )
         trademenu_button.click()
     except:
@@ -348,7 +335,7 @@ def sell(tickers, dir, prof, trade_share_count, username, password, two_fa_code=
         print("Error logging in")
 
 def sell_after_login(driver, tickers, trade_share_count):
-    enterTradeTicket(driver)    # Click on brokerage overview
+
     navigate_to_trade(driver)
     initiate_account_selection(driver)
 
