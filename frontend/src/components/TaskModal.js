@@ -3,7 +3,14 @@ import { getData } from "../utils/localStorage";
 import { toast } from 'react-toastify';
 import api from '../services/api';
 
-const TaskModal = ({ show, handleClose, handleSave, initialData, requireTwoFA, sessionId, method }) => {
+const TaskModal = ({ 
+  show, 
+  handleClose, 
+  handleSave, 
+  initialData, 
+  pendingTwoFAs = [], 
+  onTwoFAComplete 
+}) => {
   // Define default task details
   const defaultTaskDetails = {
     name: "",
@@ -18,7 +25,19 @@ const TaskModal = ({ show, handleClose, handleSave, initialData, requireTwoFA, s
 
   const [taskDetails, setTaskDetails] = useState(initialData || defaultTaskDetails);
   const [twoFaCode, setTwoFaCode] = useState("");
+  const [currentTwoFAIndex, setCurrentTwoFAIndex] = useState(0);
+  const [displayAllTwoFAs, setDisplayAllTwoFAs] = useState(false);
+  const [twoFaCodes, setTwoFaCodes] = useState({});
   const [filteredProfiles, setFilteredProfiles] = useState([]);
+
+  // Reset codes when modal opens or closes
+  useEffect(() => {
+    if (show && pendingTwoFAs.length > 0) {
+      setTwoFaCode("");
+      setCurrentTwoFAIndex(0);
+      setTwoFaCodes({});
+    }
+  }, [show, pendingTwoFAs]);
 
   // When initialData changes, update taskDetails state
   useEffect(() => {
@@ -94,39 +113,101 @@ const TaskModal = ({ show, handleClose, handleSave, initialData, requireTwoFA, s
     handleSave(taskDetails);
   };
 
-  // Handle 2FA submission
-  const handle2FASubmit = async (e) => {
-    e.preventDefault();
-    if ((method === 'text' || method === 'captcha_and_text' || method === 'email') && !twoFaCode) {
-      toast.error('Please enter the 2FA code.');
-      return;
+  // Handle 2FA submission for a specific request
+  const handle2FASubmit = async (sessionId, method, index = null) => {
+    let code;
+    
+    if (displayAllTwoFAs) {
+      // If displaying all, get code from the object using sessionId
+      code = twoFaCodes[sessionId] || "";
+      if ((method === 'text' || method === 'captcha_and_text' || method === 'email') && !code) {
+        toast.error('Please enter the 2FA code.');
+        return;
+      }
+    } else {
+      // If displaying one at a time, use the single input field
+      code = twoFaCode;
+      if ((method === 'text' || method === 'captcha_and_text' || method === 'email') && !code) {
+        toast.error('Please enter the 2FA code.');
+        return;
+      }
     }
+    
     try {
       const payload = {
         session_id: sessionId,
-        two_fa_code: method === 'app' ? null : twoFaCode,
+        two_fa_code: method === 'app' ? null : code,
       };
+      
       const response = await api.post('/complete_2fa', payload);
+      
       if (response.data.status === 'success') {
-        const updatedTask = { ...taskDetails, status: 'Success' };
-        toast.success('Trade successful.');
-        handleSave(updatedTask);
+        // Notify parent component of successful 2FA completion
+        onTwoFAComplete(sessionId, true);
+        
+        // Get updated list of pending 2FAs (removing the one we just processed)
+        const remainingTwoFAs = pendingTwoFAs.filter(item => item.sessionId !== sessionId);
+        
+        // If showing one at a time
+        if (!displayAllTwoFAs) {
+          if (remainingTwoFAs.length > 0) {
+            // There are more 2FAs to process, show the next one
+            // Reset the index if needed to prevent out-of-bounds
+            const nextIndex = Math.min(currentTwoFAIndex, remainingTwoFAs.length - 1);
+            setCurrentTwoFAIndex(nextIndex);
+            setTwoFaCode(""); // Clear the input field for the next code
+          } else {
+            // No more 2FAs, close the modal
+            handleClose();
+          }
+        } else {
+          // For all-at-once mode
+          // Remove this code from the inputs object
+          setTwoFaCodes(prev => {
+            const updated = {...prev};
+            delete updated[sessionId];
+            return updated;
+          });
+          
+          // If all 2FAs are now processed, close the modal
+          if (remainingTwoFAs.length === 0) {
+            handleClose();
+          }
+        }
       } else {
-        const updatedTask = { ...taskDetails, status: 'Failed - Response' };
-        toast.error(`2FA failed: ${response.data.message || 'Unknown error.'}`);
-        handleSave(updatedTask);
+        onTwoFAComplete(sessionId, false, response.data.message || 'Unknown error.');
       }
     } catch (error) {
-      const updatedTask = { ...taskDetails, status: 'Failed - Unknown' };
-      console.error('2FA failed:', error.response ? error.response.data : error.message);
-      toast.error(`2FA failed: ${error.response?.data?.error || 'Unknown error.'}`);
-      handleSave(updatedTask);
-    } finally {
-      setTwoFaCode("");
+      onTwoFAComplete(
+        sessionId, 
+        false, 
+        error.response?.data?.error || 'Unknown error.'
+      );
     }
   };
-
+  
+  // Handle change for individual 2FA code inputs (when showing all)
+  const handleTwoFACodeChange = (sessionId, value) => {
+    setTwoFaCodes(prev => ({
+      ...prev,
+      [sessionId]: value
+    }));
+  };
+  
+  // Toggle between showing one at a time or all at once
+  const toggleDisplayMode = () => {
+    setDisplayAllTwoFAs(!displayAllTwoFAs);
+  };
+  
   if (!show) return null;
+  
+  // Determine if we're showing the 2FA section
+  const showingTwoFA = pendingTwoFAs && pendingTwoFAs.length > 0;
+  
+  // Current 2FA request when showing one at a time
+  const currentTwoFA = showingTwoFA && !displayAllTwoFAs && pendingTwoFAs.length > 0 
+    ? pendingTwoFAs[currentTwoFAIndex] 
+    : null;
 
   return (
     <div className="modal show d-block" role="dialog">
@@ -134,7 +215,7 @@ const TaskModal = ({ show, handleClose, handleSave, initialData, requireTwoFA, s
         <div className="modal-content">
           <div className="modal-header">
             <h5 className="modal-title text-dark">
-              {requireTwoFA ? "2FA Verification" : (initialData ? "Edit Task" : "Create Task")}
+              {showingTwoFA ? "2FA Verification" : (initialData ? "Edit Task" : "Create Task")}
             </h5>
             <button
               type="button"
@@ -143,7 +224,7 @@ const TaskModal = ({ show, handleClose, handleSave, initialData, requireTwoFA, s
             ></button>
           </div>
           <div className="modal-body text-dark">
-            {!requireTwoFA && (
+            {!showingTwoFA && (
               <form>
                 {/* Task Name */}
                 <div className="mb-3">
@@ -259,31 +340,106 @@ const TaskModal = ({ show, handleClose, handleSave, initialData, requireTwoFA, s
               </form>
             )}
 
-            {/* 2FA Code Input */}
-            {requireTwoFA && (
-              <div className="mb-3">
-                {method === 'app' ? (
-                  <>
-                    <div className="alert alert-info">
-                      Please approve the authentication request in your app, then click Continue.
+            {/* 2FA Code Input Section */}
+            {showingTwoFA && (
+              <div>
+                {pendingTwoFAs.length > 1 && (
+                  <div className="d-flex justify-content-between mb-3">
+                    <span>{pendingTwoFAs.length} 2FA requests pending</span>
+                    <button 
+                      className="btn btn-sm btn-outline-secondary"
+                      onClick={toggleDisplayMode}
+                    >
+                      {displayAllTwoFAs ? "Show One at a Time" : "Show All Requests"}
+                    </button>
+                  </div>
+                )}
+                
+                {!displayAllTwoFAs ? (
+                  /* One at a time display */
+                  <div className="mb-3">
+                    <div className="alert alert-info mb-3">
+                      <strong>Account:</strong> {currentTwoFA.username} ({currentTwoFA.broker})
+                      <br />
+                      <strong>Request:</strong> {currentTwoFAIndex + 1} of {pendingTwoFAs.length}
                     </div>
-                    <button className="btn btn-primary" onClick={handle2FASubmit}>
-                      Continue
-                    </button>
-                  </>
+                    
+                    {currentTwoFA.method === 'app' ? (
+                      <>
+                        <div className="alert alert-info">
+                          Please approve the authentication request in your app for {currentTwoFA.broker} account ({currentTwoFA.username}), then click Continue.
+                        </div>
+                        <button 
+                          className="btn btn-primary" 
+                          onClick={() => handle2FASubmit(currentTwoFA.sessionId, currentTwoFA.method)}
+                        >
+                          Continue
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <label className="form-label text-dark">
+                          Enter 2FA Code for {currentTwoFA.broker} ({currentTwoFA.username})
+                        </label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={twoFaCode}
+                          onChange={(e) => setTwoFaCode(e.target.value)}
+                          placeholder={`Code for ${currentTwoFA.broker}`}
+                        />
+                        <button 
+                          className="btn btn-primary mt-2" 
+                          onClick={() => handle2FASubmit(currentTwoFA.sessionId, currentTwoFA.method)}
+                        >
+                          Submit 2FA
+                        </button>
+                      </>
+                    )}
+                  </div>
                 ) : (
-                  <>
-                    <label className="form-label text-dark">2FA Code</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={twoFaCode}
-                      onChange={(e) => setTwoFaCode(e.target.value)}
-                    />
-                    <button className="btn btn-primary mt-2" onClick={handle2FASubmit}>
-                      Submit 2FA
-                    </button>
-                  </>
+                  /* All at once display */
+                  <div>
+                    {pendingTwoFAs.map((twoFA, index) => (
+                      <div key={twoFA.sessionId} className="card mb-3">
+                        <div className="card-header">
+                          {twoFA.broker} - {twoFA.username}
+                        </div>
+                        <div className="card-body">
+                          {twoFA.method === 'app' ? (
+                            <>
+                              <p>Please approve the authentication request in your app.</p>
+                              <button 
+                                className="btn btn-primary" 
+                                onClick={() => handle2FASubmit(twoFA.sessionId, twoFA.method, index)}
+                              >
+                                Continue
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <label className="form-label">Enter 2FA Code</label>
+                              <input
+                                type="text"
+                                className="form-control mb-2"
+                                value={twoFaCodes[twoFA.sessionId] || ""}
+                                onChange={(e) => handleTwoFACodeChange(twoFA.sessionId, e.target.value)}
+                                placeholder="Enter code"
+                              />
+                              <button 
+                                className="btn btn-primary" 
+                                onClick={() => {
+                                  handle2FASubmit(twoFA.sessionId, twoFA.method, index);
+                                }}
+                              >
+                                Submit
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             )}
@@ -296,11 +452,13 @@ const TaskModal = ({ show, handleClose, handleSave, initialData, requireTwoFA, s
             >
               Close
             </button>
-            {!requireTwoFA && (
+            {!showingTwoFA && (
               <button
                 type="button"
                 className="btn btn-primary"
-                onClick={handleSubmit}
+                onClick={(e) => {
+                  handleSubmit();
+                }}
               >
                 Save Task
               </button>

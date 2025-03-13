@@ -21,11 +21,8 @@ const Tasks = () => {
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
 
-
-  // 2FA related state for modal (for starting task)
-  const [requireTwoFA, setRequireTwoFA] = useState(false);
-  const [sessionId, setSessionId] = useState(null);
-  const [method, setMethod] = useState("");
+  // Replace the single 2FA states with an array to track multiple requests
+  const [pendingTwoFAs, setPendingTwoFAs] = useState([]);
 
   // Save task groups, tasks, and profiles to localStorage when they change
   useEffect(() => {
@@ -111,6 +108,7 @@ const Tasks = () => {
           action: taskToStart.action,
           quantity: taskToStart.quantity,
           broker: taskToStart.broker,
+          username: taskToStart.username,
           status: 'Success',
         };
         recordTransaction(newTransaction);
@@ -120,12 +118,20 @@ const Tasks = () => {
         setTasks({ ...tasks, [selectedGroup]: updatedTasks });
       } else if (response.data.status === '2FA_required') {
         updatedTasks[index].status = '2FA';
-        setRequireTwoFA(true);
-        setSessionId(response.data.session_id);
-        setMethod(response.data.method);
-        setEditingIndex(index);
-        setEditingTask(taskToStart);
-        setShowModal(true);
+        
+        // Instead of setting individual states, add to the pendingTwoFAs array
+        const newTwoFARequest = {
+          sessionId: response.data.session_id,
+          method: response.data.method,
+          taskIndex: index,
+          task: taskToStart,
+          // Add broker and account info for display
+          broker: taskToStart.broker,
+          username: taskToStart.username || taskToStart.profile // Make sure username exists
+        };
+        
+        setPendingTwoFAs(prev => [...prev, newTwoFARequest]);
+        setShowModal(true); // Make sure this is set to true
         toast.info('2FA is required.');
       }  else {
         const failedTransaction = {
@@ -134,6 +140,7 @@ const Tasks = () => {
           action: taskToStart.action,
           quantity: taskToStart.quantity,
           broker: taskToStart.broker,
+          username: taskToStart.username,
           status: 'Failed',
         };
         recordTransaction(failedTransaction);
@@ -180,14 +187,12 @@ const Tasks = () => {
     if (!selectedGroup) return;
     setEditingTask(tasks[selectedGroup][index]);
     setEditingIndex(index);
-    setRequireTwoFA(false);
     setShowModal(true);
   };
 
   const openTaskModalForCreate = () => {
     setEditingTask(null);
     setEditingIndex(null);
-    setRequireTwoFA(false);
     setShowModal(true);
   };
 
@@ -208,9 +213,55 @@ const Tasks = () => {
     setShowModal(false);
     setEditingTask(null);
     setEditingIndex(null);
-    setRequireTwoFA(false);
-    setSessionId(null);
-    setMethod("");
+    setPendingTwoFAs([]);
+  };
+
+  // Add a function to handle 2FA completion
+  const handleTwoFAComplete = (sessionId, success, message) => {
+    // Find the completed 2FA request and task index
+    const completedRequest = pendingTwoFAs.find(req => req.sessionId === sessionId);
+    if (!completedRequest) return;
+    
+    const updatedTasks = [...tasks[selectedGroup]];
+    const index = completedRequest.taskIndex;
+    
+    // Update task status based on 2FA result
+    if (success) {
+      updatedTasks[index].status = 'Success';
+      toast.success('Trade successful.');
+      
+      const newTransaction = {
+        date: new Date().toLocaleString(),
+        tickers: completedRequest.task.tickers,
+        action: completedRequest.task.action,
+        quantity: completedRequest.task.quantity,
+        broker: completedRequest.task.broker,
+        username: completedRequest.task.username,
+        status: 'Success',
+      };
+      recordTransaction(newTransaction);
+    } else {
+      updatedTasks[index].status = 'Failed - 2FA';
+      toast.error(`2FA failed: ${message || 'Unknown error.'}`);
+      
+      const failedTransaction = {
+        date: new Date().toLocaleString(),
+        tickers: completedRequest.task.tickers,
+        action: completedRequest.task.action,
+        quantity: completedRequest.task.quantity,
+        broker: completedRequest.task.broker,
+        username: completedRequest.task.username,
+        status: 'Failed - 2FA',
+      };
+      recordTransaction(failedTransaction);
+    }
+    
+    setTasks({...tasks, [selectedGroup]: updatedTasks});
+    
+    // Remove the completed request from pending list
+    setPendingTwoFAs(prevRequests => 
+      prevRequests.filter(req => req.sessionId !== sessionId)
+    );
   };
 
   return (
@@ -363,22 +414,19 @@ const Tasks = () => {
         )}
       </div>
 
-      {/* Task Modal */}
+      {/* Task Modal - update to pass the array of pending 2FAs */}
       <TaskModal
         show={showModal}
         handleClose={() => {
           setShowModal(false);
-          setRequireTwoFA(false);
-          setSessionId(null);
-          setMethod("");
+          setPendingTwoFAs([]); // Clear all pending 2FAs when modal is closed
           setEditingTask(null);
           setEditingIndex(null);
         }}
         handleSave={handleTaskModalSave}
         initialData={editingTask}
-        requireTwoFA={requireTwoFA}
-        sessionId={sessionId}
-        method={method}
+        pendingTwoFAs={pendingTwoFAs}
+        onTwoFAComplete={handleTwoFAComplete}
       />
       {showGroupModal && (
         <div className="modal show d-block" role="dialog">
