@@ -15,8 +15,7 @@
     <li>Profiles</li>
     <li>Task management</li>
     <li>
-      <ul>
-        Dashboard
+      <ul>Dashboard
         <li>
           Transaction History
         </li>
