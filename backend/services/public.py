@@ -12,6 +12,17 @@ two_fa_sessions = {}
 
 def login(driver, tempdir, username, password):
     wait = WebDriverWait(driver, 10)
+
+    # Wait for and locate the button that contains the span with text "Continue to login"
+    try:
+        continue_login_button = WebDriverWait(driver, 4).until(
+            EC.element_to_be_clickable((By.XPATH, "//button[.//span[text()='Continue to login']]"))
+        )
+        # Click the button
+        continue_login_button.click()
+    except:
+        pass
+
     try:
         username_field = wait.until(
             EC.element_to_be_clickable((By.XPATH, '//*[@id="email"]'))
@@ -96,11 +107,6 @@ def complete_2fa_and_trade(session_id, two_fa_code=None):
     del two_fa_sessions[session_id]
 
     return trade_response
-    
-
-
-# redirect site: https://public.com/portfolio
-
 
 def buy(tickers, dir, prof, trade_share_count, username, password, two_fa_code=None):
     driver, temp_dir = start_regular_driver(dir, prof)
@@ -148,12 +154,15 @@ def buy(tickers, dir, prof, trade_share_count, username, password, two_fa_code=N
             'error': str(e)
         }
     
-
+# redirect site: https://public.com/portfolio
 def buy_after_login(driver, tickers, trade_share_count):
     try:
+        # Wait for redirect
         while (driver.current_url != "https://public.com/portfolio"):
             time.sleep(1)
         logger.info("Logged onto Public!")
+
+        logger.info(f"Buying {tickers}...")
 
         for ticker in tickers:
             ticker_search(driver, ticker)
@@ -165,6 +174,7 @@ def buy_after_login(driver, tickers, trade_share_count):
 
         very_short_sleep()
         execute_trades(driver)
+        logger.info("Buy orders executed for Public")
     except:
         logger.error("Error after log in")
 
@@ -249,6 +259,7 @@ def sell_after_login(driver, tickers, trade_share_count):
     driver.quit()    
 
 def ticker_search(driver, ticker):
+    logger.info(f"Searching for {ticker}...")
     wait = WebDriverWait(driver, 10)
     try:
         search_input = wait.until(
@@ -256,8 +267,9 @@ def ticker_search(driver, ticker):
         )
         human_type(ticker, search_input)
         short_sleep()
+
         search_input.send_keys(Keys.DOWN)
-        very_short_sleep()
+        short_sleep()
         search_input.send_keys(Keys.ENTER)
 
     except:
@@ -265,20 +277,32 @@ def ticker_search(driver, ticker):
 
 def setup_trade(driver, qty):
     wait = WebDriverWait(driver, 10)
+    
+    # Check if trade type is dollars or shares
     try:
-        # buy_type = wait.until(
-        #     EC.element_to_be_clickable((By.XPATH, '//*[@id="radix-:r5u:"]'))
-        # )
-        # buy_type.click()
-        # very_short_sleep()
-        # logger.info("Switching to sharse...")
+        trade_type_dollars = wait.until(
+            EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div[1]/div/div/div[2]/main/div/div[2]/div[1]/div/div[2]/div[2]/button/span"))
+        )
+        
+        if trade_type_dollars.text == "Dollars":
+            logger.info(f"Trade type: {trade_type_dollars.text}")
+            trade_type_dollars.click()
+            logger.info("Clicked trade type")
+            short_sleep()
+        
+            shares_div = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, "//div[@role='menuitem' and .//div[text()='Shares']]"))
+            )
+            shares_div.click()
+    except:
+        # Trade type is shares, no need to do anything
+        logger.error("Trade type is shares, no need to do anything")
 
-        # in_shares = driver.find_element(By.XPATH, '//*[@id="radix-:r5v:"]/div[2]')
-        # in_shares.click()
+    try:
         logger.info("Inputting amount...")
         very_short_sleep()
         share_amount = wait.until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="quantity"]'))
+            EC.element_to_be_clickable((By.ID, 'quantity'))
         )
         
         human_type(str(qty), share_amount)
@@ -288,30 +312,48 @@ def setup_trade(driver, qty):
 
 def execute_trades(driver):
     wait = WebDriverWait(driver, 10)
+
+    logger.info("Executing trades...")
     try:
         go_to_q = wait.until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="side-nav"]/ul/li[12]/a'))
+            EC.element_to_be_clickable((By.CSS_SELECTOR, "a[href='/queue']"))
         )
         go_to_q.click()
+        short_sleep()
+    except Exception as e:
+        logger.error(f"Error clicking queue link: {str(e)}")
+        return
+    short_sleep()
 
-        select_all_drafts = wait.until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="page-content"]/div/div/table/thead/tr/th[10]'))
+    logger.info("Selecting all drafts...")
+    try:
+        checkbox_label = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "//th[@class='css-10w08f']//label[@aria-checked='false']"))
         )
-        select_all_drafts.click()
-        very_short_sleep()
+        checkbox_label.click()
+        short_sleep()
+    except Exception as e:
+        logger.error(f"Error selecting drafts: {str(e)}")
+        return
+    very_short_sleep()
 
+    logger.info("Submitting trades...")
+    try:
         submit_button = wait.until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="page-content"]/div/div/div[2]/div[2]/div[2]/button'))
+            EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'Submit')]"))
         )
         submit_button.click()
         short_sleep()
+    except Exception as e:
+        logger.error(f"Error clicking submit button: {str(e)}")
+        return
+    very_short_sleep()
         
+    try:
         confirm_submission = wait.until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="page-content"]/div/div/div[2]/div[2]/div[2]/button'))
+            EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Confirm submission']"))
         )
         confirm_submission.click()
-        rand_sleep()
-
-        logger.info("ORDER SUBMITTED")
     except Exception as e:
-        logger.error("Error during order submission: " + e)
+        logger.error(f"Error confirming submission: {str(e)}")
+        return
