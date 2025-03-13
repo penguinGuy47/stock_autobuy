@@ -6,7 +6,7 @@
 <body>
   <h1>Autotrade - Stock Automation</h1>
   <p>
-    Autotrade is a powerful automation tool that streamlines stock trading across multiple brokerages through a single interface. It enables users to execute trades, see trading history, and automate routine transactions without switching between different trading platforms. With support for major brokers like Chase, Fidelity, and Schwab, Autotrade simplifies the trading experience while saving time through its task management and scheduling capabilities. 
+    Autotrade is a powerful automation tool that streamlines stock trading across multiple brokerages through a single interface. It enables users to execute trades, see trading history, and automate routine transactions without switching between different trading platforms. With support for major brokers like Chase, Fidelity, and Schwab, Autotrade simplifies the trading experience while saving time through its task management capabilities. 
   </p>
 
   <h2>Current Features</h2>
