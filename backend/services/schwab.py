@@ -27,16 +27,24 @@ def login(driver, tempdir ,username, password):
 
         login_button = driver.find_element(By.XPATH, '//*[@id="btnLogin"]')
         login_button.click()
+        
+        # Switch back to default content after login
+        driver.switch_to.default_content()
+        short_sleep()
 
     except Exception as e:
         print(f"An error occurred logging in:\n\n{e}")
-
+        # Make sure we're back to default content even if there's an error
+        try:
+            driver.switch_to.default_content()
+        except:
+            pass
 
     # 2FA Handling
     try:
         # Send as mobile notification
         mobile_auth = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="mobile_approve"]'))
+            EC.element_to_be_clickable((By.ID, 'mobile_approve'))
         )
 
         mobile_auth.click()
@@ -160,7 +168,7 @@ def buy_after_login(driver, tickers, trade_share_count):
         li_elements = ul_element.find_elements(By.TAG_NAME, 'li')
         li_count = len(li_elements)
     except:
-        print("Error getting account dropdown")
+        logger.error("Error getting account dropdown")
 
     for num in range(li_count):
         if num != 0:
@@ -168,55 +176,92 @@ def buy_after_login(driver, tickers, trade_share_count):
             account_dropdown.click()
         very_short_sleep()
 
+        logger.info(f"Clicking on account {num}")
+
         # Click on account
-        account_select = driver.find_element(By.ID, f'basic-example-small-header-0-account-{num}')
-        account_select.click()
+        try:
+            account_select = driver.find_element(By.ID, f'basic-example-small-header-0-account-{num}')
+            account_select.click()
+            
+            # Wait for page to fully load after account switch
+            WebDriverWait(driver, 10).until(
+                lambda d: d.execute_script('return document.readyState') == 'complete'
+            )
+            short_sleep()  # Give additional time for any AJAX updates
+            
+        except:
+            logger.error(f"Could not select account {num}")
+
         very_short_sleep()
         for ticker in tickers:
-        # Ticker search
+            # Search for ticker
             try:
                 ticker_search = WebDriverWait(driver, 10).until(
-                    EC.element_to_be_clickable((By.XPATH, '//*[@id="_txtSymbol"]'))
+                    EC.element_to_be_clickable((By.ID, '_txtSymbol'))
                 )
                 human_type(ticker, ticker_search)
-                very_short_sleep()
-                ticker_search.send_keys(Keys.ENTER)
                 short_sleep()
 
-                action_button = driver.find_element(By.XPATH, '//*[@id="_action"]')
+                ticker_search.send_keys(Keys.ENTER)
+                short_sleep()
+            except Exception as e:
+                logger.error(f"Error searching for ticker: {str(e)}")
+                raise
+
+            # Set action to Buy
+            try:
+                action_button = driver.find_element(By.ID, '_action')
                 action_button.click()
                 very_short_sleep()
 
                 select = Select(action_button)
                 select.select_by_visible_text("Buy")
                 very_short_sleep()
+            except Exception as e:
+                logger.error(f"Error setting Buy action: {str(e)}")
+                raise
 
+            # Set quantity if needed
+            try:
                 if (trade_share_count != 1):
-                    qty_field = driver.find_element(By.XPATH, '//*[@id="ordernumber01inputqty-stepper-input"]')
+                    qty_field = driver.find_element(By.ID, 'ordernumber01inputqty-stepper-input')
                     qty_field.clear()
                     human_type(trade_share_count, qty_field)
-
-                # Click review order
-                review_order_button = driver.find_element(By.XPATH, '//*[@id="mcaio-footer"]/div/div[2]/button[2]')
-                review_order_button.click()
-                short_sleep()
-            except:
-                logger.error("Error during buy finish")
+            except Exception as e:
+                logger.error(f"Error setting quantity: {str(e)}")
+                raise
 
             # Check if limit is higher than current price
             try:
                 WebDriverWait(driver, 5).until(
-                    EC.presence_of_element_located((By.XPATH, "//*[contains(@id, 'mctorderdetail') and contains(@id, 'CHECKBOX_0')]"))
+                    EC.presence_of_element_located((By.XPATH, "//*[contains(@id, 'mctorderdetail-checkbox')]"))
                 )
-                higher_than_ask_checkbox = driver.find_element(By.XPATH, '//*[@id="mctorderdetailfbb8f5e5CHECKBOX_0"]')
+                higher_than_ask_checkbox = driver.find_element(By.ID, 'mctorderdetailfbb8f5e5CHECKBOX_0')
                 higher_than_ask_checkbox.click()
                 print("Limit price is higher than actual, continuing with purchase...\n\n")
             except Exception as e:
                 pass
 
+                  # Review order
+            try:
+                review_order_button = driver.find_element(By.XPATH, "//button[normalize-space()='Review Order']")
+                review_order_button.click()
+                short_sleep()
+            except Exception as e:
+                logger.error(f"Error clicking review order: {str(e)}")
+                raise
+
+            very_short_sleep()
+
             # Place buy order
-            submit_buy = driver.find_element(By.XPATH, '//*[@id="mtt-place-button"]')
-            submit_buy.click()
+            try:
+                submit_buy = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, '//*[@id="mtt-place-button"]'))
+                )
+                submit_buy.click()
+            except Exception as e:
+                logger.error(f"Error clicking submit buy: {str(e)}")
+
             short_sleep()
 
             print(f"Buy order for '{ticker}' submitted!")
@@ -366,7 +411,6 @@ def complete_2fa_and_trade(session_id, two_fa_code=None):
     method = session_info['method']
     action = session_info['action']
     tickers = session_info.get('tickers')
-    # ticker = session_info.get('ticker')
     trade_share_count = session_info.get('trade_share_count')
     username = session_info.get('username')
     password = session_info.get('password')
@@ -396,10 +440,15 @@ def complete_2fa_and_trade(session_id, two_fa_code=None):
         elif method == 'app':
             # Wait for user to approve app notification
             logger.info("Awaiting site redirect")
-            # Implement a polling mechanism or a waiting period
-            # For simplicity, wait for a certain time and check if login is successful
+            
+            btnContinue = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.ID, 'btnContinue'))
+            )
+            btnContinue.click()
+
+            # Wait for a certain time and check if login is successful
             try:
-                WebDriverWait(driver, 25).until(
+                WebDriverWait(driver, 30).until(
                 EC.url_to_be('https://client.schwab.com/clientapps/accounts/summary/')
             )
             except TimeoutException:
