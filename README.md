@@ -74,7 +74,6 @@
         <li>Use Android Studio's AVD Manager to create an emulator</li>
         <li>The default configuration uses device name "emulator-5554" (use the command "adb devices" to ensure its running)</li>
         <li>Install the Fennel app on the emulator before running</li>
-        <li>Before starting a fennel task, open up a terminal and run "appium --base-path=/wd/hub"
       </ul>
     </li>
   </ul>
@@ -96,6 +95,8 @@
     </li>
     <li>
       <strong>Run the application:</strong> Double-click <code>start.bat</code> to start
+    </li>
+      <li>REMINDER: Before starting a fennel task, open up a terminal and run "appium --base-path=/wd/hub"
     </li>
   </ol>
 </body>
