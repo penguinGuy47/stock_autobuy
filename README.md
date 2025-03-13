@@ -39,7 +39,7 @@
 
   <h2>Requirements</h2>
   <p>
-    Before running SARA, install the required Python packages using the included <code>requirements.txt</code> file:
+    Before running Autotrade, install the required Python packages using the included <code>requirements.txt</code> file:
   </p>
   <pre><code>pip install -r requirements.txt</code></pre>
   <p>
@@ -95,7 +95,7 @@
       </ul>
     </li>
     <li>
-      <strong>Run the application:</strong> Double-click <code>start.bat</code> to start SARA.
+      <strong>Run the application:</strong> Double-click <code>start.bat</code> to start
     </li>
   </ol>
 </body>
