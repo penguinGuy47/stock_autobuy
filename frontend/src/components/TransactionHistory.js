@@ -3,11 +3,20 @@ import { getData } from '../utils/localStorage';
 
 const TransactionHistory = () => {
     const [transactions, setTransactions] = useState([]);
+    const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'descending' });
 
     useEffect(() => {
         const storedTransactions = getData('transactionHistory') || [];
         setTransactions(storedTransactions);
     }, []);
+
+    const handleSort = (key) => {
+        let direction = 'ascending';
+        if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+            direction = 'descending';
+        }
+        setSortConfig({ key, direction });
+    }
 
     const renderTransactions = () => {
         if (transactions.length === 0) {
@@ -23,6 +32,7 @@ const TransactionHistory = () => {
                     <th>Action</th>
                     <th>Quantity</th>
                     <th>Broker</th>
+                    <th>Username</th>
                     <th>Status</th>
                 </tr>
             </thead>
@@ -34,6 +44,7 @@ const TransactionHistory = () => {
                         <td>{tx.action}</td>
                         <td>{tx.quantity}</td>
                         <td>{tx.broker}</td>
+                        <td>{tx.username || '-'}</td>
                         <td>{tx.status}</td>
                     </tr>
                 ))}
