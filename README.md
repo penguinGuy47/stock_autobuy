@@ -14,7 +14,17 @@
     <li>User-friendly UI</li>
     <li>Profiles</li>
     <li>Task management</li>
-    <li>Real-time updates</li>
+    <li>
+      <ul>
+        Dashboard
+        <li>
+          Transaction History
+        </li>
+        <li>
+          Upcoming Splits (WIP)
+        </li>
+      </ul>
+    </li>
     <li>Broker support:
       <ul>
         <li>Chase 🟢</li>
