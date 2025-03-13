@@ -515,8 +515,7 @@ def ticker_search(driver, ticker):
         search = WebDriverWait(driver,10).until(
             EC.element_to_be_clickable((By.XPATH, '//*[@id="eq-ticket-dest-symbol"]'))
         )
-
-        # enter ticker
+        
         human_type(ticker, search)
         very_short_sleep()
         search.send_keys(Keys.ENTER)
