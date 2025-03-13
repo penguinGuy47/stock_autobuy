@@ -4,11 +4,9 @@
   <meta charset="UTF-8">
 </head>
 <body>
-  <h1>SARA - Stock And Retail Automation</h1>
+  <h1>Autotrade - Stock Automation</h1>
   <p>
-    SARA is a powerful automation tool that streamlines stock trading across multiple brokerages through a single interface. It enables users to execute trades, see trading history, and automate routine transactions without switching between different trading platforms. With support for major brokers like Chase, Fidelity, and Schwab, SARA simplifies the trading experience while saving time through its task management and scheduling capabilities. 
-
-*Retail automation for popular sites like Bestbuy and Newegg are coming soon*
+    Autotrade is a powerful automation tool that streamlines stock trading across multiple brokerages through a single interface. It enables users to execute trades, see trading history, and automate routine transactions without switching between different trading platforms. With support for major brokers like Chase, Fidelity, and Schwab, Autotrade simplifies the trading experience while saving time through its task management and automation capabilities. 
   </p>
 
   <h2>Current Features</h2>
@@ -16,14 +14,23 @@
     <li>User-friendly UI</li>
     <li>Profiles</li>
     <li>Task management</li>
-    <li>Real-time updates</li>
+      <li>Dashboard
+        <ul>
+          <li>
+            Transaction History
+          </li>
+          <li>
+            Upcoming Splits (WIP)
+          </li>
+        </ul>
+      </li>
     <li>Broker support:
       <ul>
         <li>Chase 🟢</li>
         <li>Fennel 🔵</li>
         <li>Fidelity 🟢</li>
         <li>Firstrade 🔴</li>
-        <li>Public 🟡</li>
+        <li>Public 🟢</li>
         <li>Robinhood 🔵</li>
         <li>Schwab 🟢</li>
         <li>Wells Fargo 🟢</li>
@@ -41,7 +48,7 @@
 
   <h2>Requirements</h2>
   <p>
-    Before running SARA, install the required Python packages using the included <code>requirements.txt</code> file:
+    Before running Autotrade, install the required Python packages using the included <code>requirements.txt</code> file:
   </p>
   <pre><code>pip install -r requirements.txt</code></pre>
   <p>
@@ -74,7 +81,7 @@
     <li><strong>Android Emulator</strong>:
       <ul>
         <li>Use Android Studio's AVD Manager to create an emulator</li>
-        <li>The default configuration uses device name "emulator-5554"</li>
+        <li>The default configuration uses device name "emulator-5554" (use the command <code>adb devices</code> to ensure its running)</li>
         <li>Install the Fennel app on the emulator before running</li>
       </ul>
     </li>
@@ -96,7 +103,10 @@
       </ul>
     </li>
     <li>
-      <strong>Run the application:</strong> Double-click <code>start.bat</code> to start SARA.
+      <strong>Run the application:</strong> Double-click <code>start.bat</code> to start
+    </li>
+    <li>
+      Before starting a Fennel task, open up a terminal and run <code>appium --base-path=/wd/hub</code>
     </li>
   </ol>
 </body>
