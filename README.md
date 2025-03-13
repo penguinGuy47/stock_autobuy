@@ -14,7 +14,6 @@
     <li>User-friendly UI</li>
     <li>Profiles</li>
     <li>Task management</li>
-    <li>
       <li>Dashboard
         <ul>
           <li>
@@ -25,7 +24,6 @@
           </li>
         </ul>
       </li>
-    </li>
     <li>Broker support:
       <ul>
         <li>Chase 🟢</li>
