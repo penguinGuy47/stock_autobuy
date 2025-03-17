@@ -308,8 +308,8 @@ def buy_after_login(driver, tickers, trade_share_count):
 
             for ticker in tickers:
                 ticker_search(driver, ticker)
+                short_sleep()
 
-                logger.info("Clicking buy...")
                 logger.info(f"Attempting to buy {trade_share_count} shares of {ticker}")
                 buy_button = driver.find_element(By.XPATH, '//*[@id="action-buy"]/s-root/div')
                 buy_button.click()
@@ -442,11 +442,7 @@ def sell_after_login(driver, tickers, trade_share_count):
                 qty_field = driver.find_element(By.XPATH, '//*[@id="eqt-shared-quantity"]')
                 qty_field.click()
                 very_short_sleep()
-                if str(trade_share_count).lower() == "all":   # sell all
-                    sell_all_button = driver.find_element(By.XPATH, '//*[@id="stock-quatity"]/div/div[2]/div/pvd3-button')
-                    sell_all_button.click()
-                else:   # sell user specified
-                    human_type(str(trade_share_count), qty_field)
+                human_type(str(trade_share_count), qty_field)
                 very_short_sleep()
 
                 # Click somewhere else to trigger events

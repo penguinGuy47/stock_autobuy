@@ -199,7 +199,7 @@ def buy(tickers, dir, prof, trade_share_count, username, password, two_fa_code=N
     Initiates a buy operation for the specified tickers and quantity.
     """
     logger.info(f"Initiating buy operation for {trade_share_count} shares of {tickers} by user {username}")
-    driver, temp_dir = start_regular_driver(dir, prof)
+    driver, temp_dir = start_headless_driver(dir, prof)
     
     try:
         driver.get("https://robinhood.com/login")
@@ -263,8 +263,6 @@ def buy_after_login(driver, tickers, trade_share_count):
                 logger.info(f"Buy order for {trade_share_count} shares of {ticker} submitted successfully via Robinhood.")
                 short_sleep()
                 
-
-            logger.info(f"Buy order for {trade_share_count} shares of {tickers} submitted successfully via Robinhood.")
         
             if ticker != ticker_list[-1]:
                 try:
@@ -272,6 +270,8 @@ def buy_after_login(driver, tickers, trade_share_count):
                     short_sleep()
                 except Exception as e:
                     logger.error(f"Error switching to home page: {str(e)}")
+                    
+        logger.info(f"Buy order for {trade_share_count} shares of {tickers} submitted successfully via Robinhood.")
 
         return {
             'status': 'success',
@@ -286,7 +286,7 @@ def sell(tickers, dir, prof, trade_share_count, username, password, two_fa_code=
     Initiates a sell operation for the specified tickers and quantity.
     """
     logger.info(f"Initiating sell operation for {trade_share_count} shares of {tickers} by user {username}")
-    driver, temp_dir = start_regular_driver(dir, prof)
+    driver, temp_dir = start_headless_driver(dir, prof)
     
     try:
         driver.get("https://robinhood.com/login")
@@ -425,35 +425,76 @@ def get_account_info(driver):
 def enter_share_qty(driver, qty):
     """
     Enters the share quantity into the order form.
-
+    Handles both UI variants:
+    1. Stocks with Dollars/Shares dropdown options
+    2. Low-priced stocks with only Shares option
     """
-    short_sleep()
+    logger.info("Inside enter share quantity...")
+    
+    # First, check if "Buy In" label exists (which indicates Dollars/Shares dropdown)
     try:
-        shares_dropdown = driver.find_element(By.XPATH, '(//button[contains(@id, "downshift-") and contains(@id, "-toggle-button")])[2]')
-        very_short_sleep()
-        logger.info("Inside enter_share_qty")
-        button_text = shares_dropdown.text
-
-        if "Dollars" in button_text:
+        # Look for the "Buy In" label which indicates the Dollars/Shares dropdown exists
+        buy_in_label = driver.find_elements(By.XPATH, "//label[contains(text(), 'Buy In')]")
+        
+        if buy_in_label:
+            logger.info("Found 'Buy In' dropdown - stock offers Dollars/Shares toggle")
+            # Handle the Dollars/Shares dropdown scenario
             try:
-                shares_dropdown.click()
-                shares_option = driver.find_element(By.CSS_SELECTOR, "[id$='options-menu-list-option-share']")
+                # Find the dropdown button with Dollars or Shares text
+                shares_dropdown = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((
+                        By.XPATH, 
+                        "//button[contains(@id, 'downshift-') and contains(@id, '-toggle-button')]//span[contains(text(), 'Dollars') or contains(text(), 'Shares')]/ancestor::button"
+                    ))
+                )
                 very_short_sleep()
 
-                shares_option.click()
-                logger.info("Shares mode selected")
-                short_sleep()
-            except Exception:
-                logger.info("Error clicking shares mode dropdown")
-        else:
-            logger.info("Shares mode already selected")
-    except Exception:
-        logger.error(f"Error finding or clicking shares mode dropdown: {str(e)}")
-        raise e
+                logger.info(f"Found dropdown with text: {shares_dropdown.text}")
+                button_text = shares_dropdown.text
 
+                # Only switch if currently in Dollars mode
+                if "Dollars" in button_text:
+                    try:
+                        shares_dropdown.click()
+                        logger.info("Clicked on dollars dropdown")
+                        very_short_sleep()
+                        
+                        # Wait for menu to appear and select 'Shares' option
+                        shares_option = WebDriverWait(driver, 10).until(
+                            EC.element_to_be_clickable((
+                                By.XPATH, 
+                                "//*[contains(@id, 'options-menu-list-option-share') or contains(text(), 'Shares')]"
+                            ))
+                        )
+                        very_short_sleep()
+
+                        shares_option.click()
+                        logger.info("Shares mode selected")
+                        short_sleep()
+                    except Exception as e:
+                        logger.info(f"Error clicking shares mode dropdown: {str(e)}")
+                else:
+                    logger.info("Shares mode already selected")
+            except Exception as e:
+                logger.error(f"Error finding or clicking shares mode dropdown: {str(e)}")
+                raise e
+        else:
+            logger.info("No 'Buy In' dropdown found - stock likely only offers Shares option")
+            # For low-priced stocks that only offer Shares option, we can proceed directly
+    except Exception as e:
+        logger.error(f"Error checking for Buy In label: {str(e)}")
+        # Continue to enter quantity even if we can't determine UI type
+
+    # Enter share quantity (same for both UI variants)
     very_short_sleep()
     try:
-        shares_qty = driver.find_element(By.CSS_SELECTOR, "[data-testid='OrderFormRows-Shares']")
+        # Use a more robust selector for the shares quantity field
+        shares_qty = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((
+                By.XPATH, 
+                "//*[@data-testid='OrderFormRows-Shares' or contains(@class, 'OrderFormRows-Shares')]"
+            ))
+        )
         shares_qty.click()
         very_short_sleep()
         
@@ -464,6 +505,7 @@ def enter_share_qty(driver, qty):
             very_short_sleep()
             
         human_type(str(qty), shares_qty)
+        logger.info(f"Entered quantity: {qty}")
     except Exception as e:
         logger.error(f"Error finding or clicking shares quantity field: {str(e)}")
         raise e
@@ -491,11 +533,11 @@ def submit_order(driver):
         short_sleep()
 
         share_field.send_keys(Keys.ENTER)
-
         logger.info("Order successfully submitted!")
+        short_sleep()
 
         done_button = wait.until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-test-id="OrderFormDone"]'))
+            EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-testid="OrderFormDone"]'))
         )
         done_button.click()
     except Exception as e:
