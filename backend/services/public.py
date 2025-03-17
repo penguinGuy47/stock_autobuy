@@ -178,6 +178,7 @@ def buy_after_login(driver, tickers, trade_share_count):
     except:
         logger.error("Error after log in")
 
+    short_sleep()
     driver.quit()    
 
 # DO HERE
@@ -347,11 +348,10 @@ def execute_trades(driver):
     except Exception as e:
         logger.error(f"Error clicking submit button: {str(e)}")
         return
-    very_short_sleep()
         
     try:
         confirm_submission = wait.until(
-            EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Confirm submission']"))
+            EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'Confirm submission')]"))
         )
         confirm_submission.click()
     except Exception as e:
