@@ -43,7 +43,6 @@ def login(driver, tempdir, username, password):
             driver.execute_script("arguments[0].focus();", username_field)
         very_short_sleep()
         
-        # More realistic typing
         human_type(username, username_field)
         very_short_sleep()
 
@@ -256,11 +255,10 @@ def buy_after_login(driver, tickers, trade_share_count):
             logger.info(f"Number of accounts found: {accounts}")
 
             for account_num in range(1, accounts + 1):
-                if account_num != 1:
-                    switch_accounts(driver, account_num)
-                    logger.info(f"Switched to account {account_num}")
-                    very_short_sleep()
+                select_account(driver, account_num)
+                short_sleep()
                 enter_share_qty(driver, trade_share_count)
+                logger.info("Successfully entered share quantity")
                 submit_order(driver)
                 logger.info(f"Buy order for {trade_share_count} shares of {ticker} submitted successfully via Robinhood.")
                 short_sleep()
@@ -283,64 +281,99 @@ def buy_after_login(driver, tickers, trade_share_count):
         logger.error(f"Error during buy_after_login operation: {str(e)}")
         raise e
 
-def sell(tickers, dir, prof, qty, username, password, two_fa_code=None):
+def sell(tickers, dir, prof, trade_share_count, username, password, two_fa_code=None):
     """
-    Initiates a sell operation for the specified ticker and quantity.
+    Initiates a sell operation for the specified tickers and quantity.
     """
-    logger.info(f"Initiating sell operation for {qty} shares of {tickers} by user {username}")
+    logger.info(f"Initiating sell operation for {trade_share_count} shares of {tickers} by user {username}")
     driver, temp_dir = start_regular_driver(dir, prof)
-    driver.get("https://robinhood.com/login")
-    short_sleep()
+    
+    try:
+        driver.get("https://robinhood.com/login")
+        login_response = login(driver, temp_dir, username, password)
 
-    login_response = login(driver, temp_dir, username, password)
+        if login_response['status'] == '2FA_required':
+            logger.info(f"2FA required via {login_response['method']}.")
+            session_id = login_response.get('session_id')
+            two_fa_sessions[session_id]['action'] = 'sell'
+            two_fa_sessions[session_id]['tickers'] = tickers  
+            two_fa_sessions[session_id]['trade_share_count'] = trade_share_count  
+            os.system('echo \a')
+            return {
+                'status': '2FA_required',
+                'method': login_response['method'],
+                'session_id': session_id,
+                'message': '2FA is required.'
+            }
+        elif login_response['status'] == 'success':
+            trade_response = sell_after_login(driver, tickers, trade_share_count) 
+            driver.quit()
+            shutil.rmtree(temp_dir, ignore_errors=True)
+            return trade_response
+        else:
+            driver.quit()
+            shutil.rmtree(temp_dir, ignore_errors=True)
+            return {
+                'status': 'failure',
+                'message': login_response.get('message', 'Login failed.')
+            }
 
-    if login_response['status'] == '2FA_required':
-        session_id = login_response.get('session_id')
-        two_fa_sessions[session_id]['action'] = 'sell'
-        two_fa_sessions[session_id]['ticker'] = tickers
-        two_fa_sessions[session_id]['qty'] = qty
-        return {
-            'status': '2FA_required',
-            'method': login_response['method'],
-            'session_id': session_id,
-            'message': '2FA is required. Please provide the 2FA code.'
-        }
-    elif login_response['status'] == 'success':
-        trade_response = sell_after_login(driver, tickers, qty)
-        driver.quit()
-        shutil.rmtree(temp_dir, ignore_errors=True)
-        return trade_response
-    else:
+    except Exception as e:
+        logger.error(f"Error during sell operation: {str(e)}")
         driver.quit()
         shutil.rmtree(temp_dir, ignore_errors=True)
         return {
             'status': 'failure',
-            'message': login_response.get('message', 'Login failed.')
+            'message': f'Failed to sell {tickers}.',
+            'error': str(e)
         }
 
-def sell_after_login(driver, tickers, qty):
+def sell_after_login(driver, tickers, trade_share_count):
     """
     Executes the sell operation after a successful login.
     """
     try:
-        setup_trade(driver, tickers)
-        # Navigate to the sell option (adjust XPath as needed)
-        sell_option = driver.find_element(By.XPATH, 'XPATH_FOR_SELL_OPTION')  # PLACEHOLDER: update with actual XPath
-        sell_option.click()
-        very_short_sleep()
+        ticker_list = tickers if isinstance(tickers, list) else [tickers]
 
-        accounts = get_num_accounts(driver)
-        logger.info(f"Number of accounts found: {accounts}")
+        for ticker in ticker_list:
+            setup_trade(driver, ticker)
+            
+            # Click the sell button
+            try:
+                sell_button = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "div[data-testid='OrderFormHeading-Sell']"))
+                )
+                sell_button.click()
+                logger.info("Clicked sell button")
+                very_short_sleep()
+            except Exception as e:
+                logger.error(f"Error clicking sell button: {str(e)}")
+                raise e
 
-        for account_num in range(1, accounts + 1):
-            if account_num != 1:
-                switch_accounts(driver, account_num)
-            enter_share_qty(driver, qty)
-            submit_order(driver)
-        logger.info(f"Sell order for {qty} shares of {tickers} submitted successfully via Robinhood.")
+            accounts = get_num_accounts(driver)
+            logger.info(f"Number of accounts found: {accounts}")
+
+            for account_num in range(1, accounts + 1):
+                select_account(driver, account_num)
+                short_sleep()
+                enter_share_qty(driver, trade_share_count)
+                logger.info("Successfully entered share quantity")
+                submit_order(driver)
+                logger.info(f"Sell order for {trade_share_count} shares of {ticker} submitted successfully via Robinhood.")
+                short_sleep()
+
+            logger.info(f"Sell order for {trade_share_count} shares of {tickers} submitted successfully via Robinhood.")
+        
+            if ticker != ticker_list[-1]:
+                try:
+                    driver.get("https://robinhood.com/")
+                    short_sleep()
+                except Exception as e:
+                    logger.error(f"Error switching to home page: {str(e)}")
+
         return {
             'status': 'success',
-            'message': f'Sell order for {qty} shares of {tickers} submitted via Robinhood.'
+            'message': f'Sell order for {trade_share_count} shares of {tickers} submitted via Robinhood.'
         }
     except Exception as e:
         logger.error(f"Error during sell_after_login operation: {str(e)}")
@@ -350,8 +383,6 @@ def setup_trade(driver, ticker):
     """
     Searches for the given ticker and sets up the trade page.
 
-    
-    TODO: DEBUG
     """
     logger.info(f"Setting up trade for {ticker}...")
     try:
@@ -368,34 +399,84 @@ def setup_trade(driver, ticker):
     except TimeoutException:
         logger.error("Timed out waiting for ticker search element.")
 
+def get_account_info(driver):
+    """
+    Retrieves account information 
+
+    TODO: Implement this function after dashboard balance chart is implemented
+    """
+    account_container = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, 'account-switcher-popover'))
+    )
+    accounts = account_container.find_elements(By.TAG_NAME, 'button')
+
+    # Extract account names and balances
+    account_info = []
+    for account in accounts:
+        try:
+            name = account.find_element(By.TAG_NAME, 'p').text  # First <p> tag is account name
+            balance = account.find_elements(By.TAG_NAME, 'p')[1].text  # Second <p> tag is balance
+            account_info.append((name, balance))
+        except Exception as e:
+            print(f"Error extracting account details: {e}")
+    
+    return account_info
+
 def enter_share_qty(driver, qty):
     """
     Enters the share quantity into the order form.
+
     """
     short_sleep()
     try:
-        # Switch to "shares" mode if necessary
-        shares_dropdown = driver.find_element(By.ID, 'downshift-2-toggle-button')
-        shares_dropdown.click()
+        shares_dropdown = driver.find_element(By.XPATH, '(//button[contains(@id, "downshift-") and contains(@id, "-toggle-button")])[2]')
         very_short_sleep()
-        shares_option = driver.find_element(By.CSS_SELECTOR, "[id$='options-menu-list-option-share']")
-        shares_option.click()
-        short_sleep()
+        logger.info("Inside enter_share_qty")
+        button_text = shares_dropdown.text
+
+        if "Dollars" in button_text:
+            try:
+                shares_dropdown.click()
+                shares_option = driver.find_element(By.CSS_SELECTOR, "[id$='options-menu-list-option-share']")
+                very_short_sleep()
+
+                shares_option.click()
+                logger.info("Shares mode selected")
+                short_sleep()
+            except Exception:
+                logger.info("Error clicking shares mode dropdown")
+        else:
+            logger.info("Shares mode already selected")
     except Exception:
-        pass
+        logger.error(f"Error finding or clicking shares mode dropdown: {str(e)}")
+        raise e
 
-    shares_qty = driver.find_element(By.CSS_SELECTOR, "[data-testid='OrderFormRows-Shares']")
-    shares_qty.click()
     very_short_sleep()
+    try:
+        shares_qty = driver.find_element(By.CSS_SELECTOR, "[data-testid='OrderFormRows-Shares']")
+        shares_qty.click()
+        very_short_sleep()
+        
+        # Check if field has existing value and clear if needed
+        current_value = shares_qty.get_attribute('value')
+        if current_value:
+            shares_qty.clear()
+            very_short_sleep()
+            
+        human_type(str(qty), shares_qty)
+    except Exception as e:
+        logger.error(f"Error finding or clicking shares quantity field: {str(e)}")
+        raise e
 
-    human_type(str(qty), shares_qty)
-    very_short_sleep()
 
 def submit_order(driver):
     """
     Submits the trade order.
+
+    TODO: Remove comments after debugging
     """
     logger.info("Submitting order...")
+    very_short_sleep()
 
     wait = WebDriverWait(driver, 10)
     try:
@@ -407,12 +488,12 @@ def submit_order(driver):
         very_short_sleep()
 
         share_field.send_keys(Keys.ENTER)
-        time.sleep(2)
+        short_sleep()
+
         share_field.send_keys(Keys.ENTER)
 
         logger.info("Order successfully submitted!")
 
-        # Click the done button to finalize the process
         done_button = wait.until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-test-id="OrderFormDone"]'))
         )
@@ -423,6 +504,7 @@ def submit_order(driver):
 def get_num_accounts(driver):
     """
     Retrieves the number of accounts available.
+
     """
     logger.info("Getting number of accounts...")
     try:
@@ -430,13 +512,70 @@ def get_num_accounts(driver):
             EC.element_to_be_clickable((By.CLASS_NAME, 'css-1md9imy'))
         )
         initial_dropdown.click()
-        very_short_sleep()
-        account_container = driver.find_element(By.CLASS_NAME, 'web-app-emotion-cache-1v2j8j4') 
+        logger.info("Clicked initial dropdown.")
+
+        short_sleep()
+
+        account_container = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, 'account-switcher-popover'))
+        )
         accounts = account_container.find_elements(By.TAG_NAME, 'button')
+
         return len(accounts)
     except Exception:
         logger.error("Could not locate accounts dropdown.")
         return 0
+    
+def select_account(driver, account_num):
+    """
+    Selects the specified account number.
+    """
+    if account_num != 1:
+        try:
+            initial_dropdown = WebDriverWait(driver, 15).until(
+                EC.element_to_be_clickable((By.CLASS_NAME, 'css-1md9imy'))
+            )
+            initial_dropdown.click()
+            logger.info("Clicked initial dropdown.")
+
+            try:
+                account_container = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.ID, 'account-switcher-popover'))
+                )
+                very_short_sleep()
+                try:
+                    buttons = account_container.find_elements(
+                        By.XPATH, ".//button[@type='button' and @aria-busy='false']"
+                    )
+                    buttons[account_num-1].click()
+                except Exception as e:
+                    logger.error(f"Error locating account number {account_num}.")
+                    raise e
+            except Exception as e:
+                logger.error("Error locating account container.")
+                raise e
+        except Exception as e:
+            logger.error("Error clicking initial dropdown.")
+            raise e
+        short_sleep()
+    else:
+        try:
+            account_container = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.ID, 'account-switcher-popover'))
+            )
+            very_short_sleep()
+            try:
+                buttons = account_container.find_elements(
+                    By.XPATH, ".//button[@type='button' and @aria-busy='false']"
+                )
+                buttons[account_num-1].click()
+            except Exception as e:
+                logger.error(f"Error locating account number {account_num}.")
+                raise e
+        except Exception as e:
+            logger.error("Error locating account container.")
+            raise e
+
 
 def switch_accounts(driver, account_num):
     """
