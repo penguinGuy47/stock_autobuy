@@ -178,10 +178,10 @@ def buy_after_login(driver, tickers, trade_share_count):
     except:
         logger.error("Error after log in")
 
-    short_sleep()
+    long_sleep()
     driver.quit()    
 
-# DO HERE
+
 def sell(tickers, dir, prof, trade_share_count, username, password, two_fa_code=None):
     driver, temp_dir = start_headless_driver(dir, prof)
 
@@ -257,6 +257,7 @@ def sell_after_login(driver, tickers, trade_share_count):
     except:
         logger.error("Error after log in")
 
+    long_sleep()
     driver.quit()    
 
 def ticker_search(driver, ticker):
