@@ -110,7 +110,7 @@ def buy(tickers, dir, prof, trade_share_count, username, password, two_fa_code=N
     driver, temp_dir = start_regular_driver(dir, prof)
 
     try:
-        driver.get("https://client.schwab.com/Areas/Access/Login")
+        driver.get("https://client.schwab.com/app/trade/tom/trade")
         login_response = login(driver, temp_dir, username, password)
 
         if login_response['status'] == '2FA_required':
@@ -153,6 +153,7 @@ def buy(tickers, dir, prof, trade_share_count, username, password, two_fa_code=N
         }
 
 def buy_after_login(driver, tickers, trade_share_count):
+    long_sleep()
     # Redirect to trade page
     driver.get("https://client.schwab.com/app/trade/tom/trade")
     short_sleep()
@@ -187,7 +188,7 @@ def buy_after_login(driver, tickers, trade_share_count):
             WebDriverWait(driver, 10).until(
                 lambda d: d.execute_script('return document.readyState') == 'complete'
             )
-            short_sleep()  # Give additional time for any AJAX updates
+            short_sleep() 
             
         except:
             logger.error(f"Could not select account {num}")
@@ -242,7 +243,7 @@ def buy_after_login(driver, tickers, trade_share_count):
             except Exception as e:
                 pass
 
-                  # Review order
+            # Review order
             try:
                 review_order_button = driver.find_element(By.XPATH, "//button[normalize-space()='Review Order']")
                 review_order_button.click()
@@ -252,6 +253,20 @@ def buy_after_login(driver, tickers, trade_share_count):
                 raise
 
             very_short_sleep()
+
+            # Check for and handle additional order message checkbox
+            try:
+                WebDriverWait(driver, 5).until(
+                    EC.presence_of_element_located((By.XPATH, "//*[contains(@id, 'mctorderdetail') and contains(@id, 'CHECKBOX_0')]"))
+                )
+                order_message_checkbox = driver.find_element(By.ID, 'mctorderdetail058177c8CHECKBOX_0')
+                order_message_checkbox.click()
+                very_short_sleep()
+            except Exception as e:
+                # Checkbox may not always be present, so just log and continue
+                logger.info("Order message checkbox not found or not clickable")
+                pass
+
 
             # Place buy order
             try:
@@ -440,6 +455,7 @@ def complete_2fa_and_trade(session_id, two_fa_code=None):
         elif method == 'app':
             # Wait for user to approve app notification
             logger.info("Awaiting site redirect")
+            short_sleep()
             
             btnContinue = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.ID, 'btnContinue'))
@@ -449,7 +465,7 @@ def complete_2fa_and_trade(session_id, two_fa_code=None):
             # Wait for a certain time and check if login is successful
             try:
                 WebDriverWait(driver, 30).until(
-                EC.url_to_be('https://client.schwab.com/clientapps/accounts/summary/')
+                EC.url_to_be('https://client.schwab.com/app/trade/tom/trade')
             )
             except TimeoutException:
                 logger.error("App Notification 2FA not approved within the expected time.")
