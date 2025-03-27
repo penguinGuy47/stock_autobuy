@@ -43,12 +43,12 @@ def login(driver, tempdir, username, password):
                 logger.info("2FA not required. Login successful.")
                 return {'status': 'success'}
         except:
+            logger.info("Detected 2FA requirement.")
+
             # Check for "Don't ask again" checkbox indicating 2FA is present
             dont_ask_again_button = wait.until(
                 EC.element_to_be_clickable((By.XPATH, '//s-slot/s-assigned-wrapper/div[1]/div/div/pvd-cc-auth-field-group/s-root/div//label'))
             )
-
-            logger.info("Detected 2FA requirement.")
 
             # Click "Don't ask again" to proceed
             dont_ask_again_button.click()
@@ -315,7 +315,6 @@ def buy_after_login(driver, tickers, trade_share_count):
                 buy_button.click()
                 very_short_sleep()
 
-                logger.info("Entering quantity...")
                 logger.info(f"Entering quantity: {trade_share_count}")
                 # Enter quantity
                 qty_field = driver.find_element(By.XPATH, '//*[@id="eqt-shared-quantity"]')
@@ -344,7 +343,6 @@ def buy_after_login(driver, tickers, trade_share_count):
                 very_short_sleep()
 
                 preview_and_submit(driver)
-
                 # Start a new order
                 start_new_order(driver)
 
@@ -428,20 +426,17 @@ def sell_after_login(driver, tickers, trade_share_count):
 
             for ticker in tickers:
                 ticker_search(driver, ticker)
+                short_sleep()
 
                 # Click sell
-                logger.info("Clicking sell...")
                 logger.info(f"Attempting to sell {trade_share_count} shares of {ticker}")
                 sell_button = driver.find_element(By.XPATH, '//*[@id="action-sell"]/s-root/div')
                 sell_button.click()
                 very_short_sleep()
 
-
                 logger.info(f"Entering quantity: {trade_share_count}")
                 # Enter quantity
                 qty_field = driver.find_element(By.XPATH, '//*[@id="eqt-shared-quantity"]')
-                qty_field.click()
-                very_short_sleep()
                 human_type(str(trade_share_count), qty_field)
                 very_short_sleep()
 
@@ -456,7 +451,6 @@ def sell_after_login(driver, tickers, trade_share_count):
                 very_short_sleep()
 
                 preview_and_submit(driver)
-
                 # Start a new order
                 start_new_order(driver)
 
@@ -534,7 +528,7 @@ def preview_and_submit(driver):
         logger.info("Order successfully submitted!")
     except:
         logger.error("Could not submit order...")
-    short_sleep()
+    very_short_sleep()
 
 def start_new_order(driver):
     try:
