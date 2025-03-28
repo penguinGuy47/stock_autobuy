@@ -93,7 +93,6 @@ def buy(tickers, dir, prof, trade_share_count, username, password, two_fa_code=N
         }
     
 
-
 def buy_after_login(driver, tickers, trade_share_count):
 
     # enterTradeTicket(driver) 
@@ -131,7 +130,6 @@ def buy_after_login(driver, tickers, trade_share_count):
                 switch_ticket_conf.click()
             except:
                 pass
-
 
             try: 
 
@@ -195,7 +193,7 @@ def conduct_trade(driver, ticker, trade_share_count, trade_type):
             EC.element_to_be_clickable((By.XPATH, '//*[@id="ordertyperow"]/div[2]/div[2]/ul/li[1]/a'))
         )
         limit_order.click()
-        very_short_sleep()
+        short_sleep()
 
         if trade_type == "buy":
             # ASK
@@ -211,26 +209,26 @@ def conduct_trade(driver, ticker, trade_share_count, trade_type):
             EC.element_to_be_clickable((By.ID, 'Price'))
         )
         human_type(current_price, limit_input)
-        very_short_sleep()
+        short_sleep()
 
         timing_select = wait.until(
             EC.element_to_be_clickable((By.ID, 'TIFBtnText'))
         )
         timing_select.click()
-        very_short_sleep()
+        short_sleep()
 
         day_select = wait.until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, "a[data-val='Day']"))
         )
 
         day_select.click()
-        very_short_sleep()
+        short_sleep()
 
         preview_button = wait.until(
             EC.element_to_be_clickable((By.ID, 'actionbtnContinue'))
         )
         preview_button.click()
-        very_short_sleep()
+        short_sleep()
 
         try:
             submit_button = wait.until(
@@ -265,15 +263,18 @@ def initiate_account_selection(driver):
             EC.element_to_be_clickable((By.XPATH, '/html/body/nav[2]/div/ul/li[4]'))
         )
 
-        portfolio_button.click()
+        ActionChains(driver).move_to_element(portfolio_button).perform()
 
         very_short_sleep()
-        trademenu_button =  WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.ID, 'gotrading'))
-        )
-        trademenu_button.click()
+        try:
+            trademenu_button =  WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.ID, 'gotrading'))
+            )
+            trademenu_button.click()
+        except:
+            logger.error("Error clicking on trade menu button")
     except:
-        logger.info("Error clicking on trade menu button")
+        logger.error("Error clicking on portfolio button")
 
 def handle_popup(driver):
     try:
