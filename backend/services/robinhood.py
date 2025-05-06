@@ -192,7 +192,7 @@ def buy(tickers, dir, prof, trade_share_count, username, password, two_fa_code=N
     Initiates a buy operation for the specified tickers and quantity.
     """
     logger.info(f"Initiating buy operation for {trade_share_count} shares of {tickers} by user {username}")
-    driver, temp_dir = start_headless_driver(dir, prof)
+    driver, temp_dir = start_regular_driver(dir, prof)
     
     try:
         driver.get("https://robinhood.com/login")
@@ -508,7 +508,6 @@ def submit_order(driver):
     """
     Submits the trade order.
 
-    TODO: Remove comments after debugging
     """
     logger.info("Submitting order...")
     very_short_sleep()
