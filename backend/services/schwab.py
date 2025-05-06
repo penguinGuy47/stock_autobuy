@@ -227,7 +227,7 @@ def buy_after_login(driver, tickers, trade_share_count):
                 if (trade_share_count != 1):
                     qty_field = driver.find_element(By.ID, 'ordernumber01inputqty-stepper-input')
                     qty_field.clear()
-                    human_type(trade_share_count, qty_field)
+                    human_type(str(trade_share_count), qty_field)
             except Exception as e:
                 logger.error(f"Error setting quantity: {str(e)}")
                 raise
@@ -379,7 +379,7 @@ def sell_after_login(driver, tickers, trade_share_count):
             if (trade_share_count != 1):
                 qty_field = driver.find_element(By.XPATH, '//*[@id="ordernumber01inputqty-stepper-input"]')
                 qty_field.clear()
-                human_type(trade_share_count, qty_field)
+                human_type(str(trade_share_count), qty_field)
 
             # Click review order
             review_order_button = driver.find_element(By.XPATH, '//*[@id="mcaio-footer"]/div/div[2]/button[2]')
