@@ -256,10 +256,9 @@ def buy_after_login(driver, tickers, trade_share_count):
 
             # Check for and handle additional order message checkbox
             try:
-                WebDriverWait(driver, 5).until(
-                    EC.presence_of_element_located((By.XPATH, "//*[contains(@id, 'mctorderdetail') and contains(@id, 'CHECKBOX_0')]"))
+                order_message_checkbox = WebDriverWait(driver, 5).until(
+                    EC.presence_of_element_located((By.XPATH, "//*[contains(@id, 'mctorderdetail') and contains(@id, 'CHECKBOX')]"))
                 )
-                order_message_checkbox = driver.find_element(By.ID, 'mctorderdetail058177c8CHECKBOX_0')
                 order_message_checkbox.click()
                 very_short_sleep()
             except Exception as e:
@@ -267,6 +266,7 @@ def buy_after_login(driver, tickers, trade_share_count):
                 logger.info("Order message checkbox not found or not clickable")
                 pass
 
+            very_short_sleep()
 
             # Place buy order
             try:
@@ -381,26 +381,38 @@ def sell_after_login(driver, tickers, trade_share_count):
                 qty_field.clear()
                 human_type(str(trade_share_count), qty_field)
 
-            # Click review order
-            review_order_button = driver.find_element(By.XPATH, '//*[@id="mcaio-footer"]/div/div[2]/button[2]')
-            review_order_button.click()
-            short_sleep()
+            # Review order
+            try:
+                review_order_button = driver.find_element(By.XPATH, "//button[normalize-space()='Review Order']")
+                review_order_button.click()
+                short_sleep()
+            except Exception as e:
+                logger.error(f"Error clicking review order: {str(e)}")
+                raise
 
-            # # Check if limit is higher than current price
-            # try:
-            #     xpath = "//*[contains(@id, 'mctorderdetail') and contains(@id, 'CHECKBOX_0')]"
-            #     WebDriverWait(driver, 4).until(
-            #         EC.presence_of_element_located((By.XPATH, xpath))
-            #     )
-            #     higher_than_ask_checkbox = driver.find_element(By.XPATH, '//*[@id="mctorderdetailfbb8f5e5CHECKBOX_0"]')
-            #     higher_than_ask_checkbox.click()
-            #     print("Limit price is higher than actual, continuing with purchase...\n\n")
-            # except Exception as e:
-            #     pass
+            very_short_sleep()
+
+            # Check for and handle additional order message checkbox
+            try:
+                order_message_checkbox = WebDriverWait(driver, 5).until(
+                    EC.presence_of_element_located((By.XPATH, "//*[contains(@id, 'mctorderdetail') and contains(@id, 'CHECKBOX')]"))
+                )
+                order_message_checkbox.click()
+                very_short_sleep()
+            except Exception as e:
+                # Checkbox may not always be present, so just log and continue
+                logger.info("Order message checkbox not found or not clickable")
+                pass
 
             # Place sell order
-            submit_sell = driver.find_element(By.XPATH, '//*[@id="mtt-place-button"]')
-            submit_sell.click()
+            try:
+                submit_sell = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, '//*[@id="mtt-place-button"]'))
+                )
+                submit_sell.click()
+            except Exception as e:
+                logger.error(f"Error clicking submit sell: {str(e)}")
+
             short_sleep()
 
             print(f"Sell order for '{ticker}' submitted!")
@@ -462,10 +474,15 @@ def complete_2fa_and_trade(session_id, two_fa_code=None):
             )
             btnContinue.click()
 
+            success_urls = {
+                'https://client.schwab.com/app/trade/tom/trade',
+                'https://client.schwab.com/clientapps/accounts/summary/'
+            }
+
             # Wait for a certain time and check if login is successful
             try:
                 WebDriverWait(driver, 30).until(
-                EC.url_to_be('https://client.schwab.com/app/trade/tom/trade')
+                lambda d: d.current_url in success_urls
             )
             except TimeoutException:
                 logger.error("App Notification 2FA not approved within the expected time.")
