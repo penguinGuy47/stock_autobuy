@@ -25,10 +25,23 @@ def login(driver, tempdir, username, password):
         sign_on_button = driver.find_element(By.XPATH, '//*[@id="btnSignon"]')
         sign_on_button.click()
 
-        send_mobile_2fa = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="app-modal-root"]/div[4]/div/div/div/div/div/div/div/div[2]/div/div[2]/div[2]/div/ul/li[1]/button'))
-        )
-        send_mobile_2fa.click()
+        try:
+            select_phone_number = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, "/html/body/div[2]/div[5]/div/div/div/div[2]/div/div[2]/div/div[1]/button/div/div/span[1]"))
+            )
+            select_phone_number.click()
+        except:
+            logger.error("Error selecting phone number")
+            return {'status': 'error', 'message': 'Error selecting phone number'}
+
+        # try:
+        #     send_mobile_2fa = WebDriverWait(driver, 10).until(
+        #         EC.element_to_be_clickable((By.XPATH, '//*[@id="app-modal-root"]/div[4]/div/div/div/div/div/div/div/div[2]/div/div[2]/div[2]/div/ul/li[1]/button'))
+        #     )
+        #     send_mobile_2fa.click()
+        # except:
+        #     logger.error("Error selecting send mobile 2FA")
+        #     return {'status': 'error', 'message': 'Error selecting send mobile 2FA'}
 
         # Generate a unique session ID
         session_id = str(uuid.uuid4())
@@ -418,6 +431,7 @@ def complete_2fa_and_trade(session_id, two_fa_code=None):
     # username = session_info.get('username')
     # password = session_info.get('password')
 
+
     try:
         verify_code = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, '//*[@id="otp"]'))
@@ -425,7 +439,7 @@ def complete_2fa_and_trade(session_id, two_fa_code=None):
         human_type(two_fa_code, verify_code)
         very_short_sleep()
 
-        continue_button = driver.find_element(By.XPATH, '/html/body/div[2]/div[4]/div/div/div/div/div/div/div/div[2]/div/form/div[3]/footer/div/button[1]')
+        continue_button = driver.find_element(By.XPATH, '/html/body/div[2]/div[5]/div/div/div/div[2]/div/form/div[3]/div/button[1]')
         continue_button.click()
     except:
         print("Error completing 2FA")
