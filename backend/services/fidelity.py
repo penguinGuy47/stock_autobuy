@@ -45,23 +45,30 @@ def login(driver, tempdir, username, password):
         except:
             logger.info("Detected 2FA requirement.")
 
-            # Check for "Don't ask again" checkbox indicating 2FA is present
-            dont_ask_again_button = wait.until(
-                EC.element_to_be_clickable((By.XPATH, '//s-slot/s-assigned-wrapper/div[1]/div/div/pvd-cc-auth-field-group/s-root/div//label'))
-            )
-
-            # Click "Don't ask again" to proceed
-            dont_ask_again_button.click()
-            very_short_sleep()
-
-            # Attempt 2FA via Text
             try:
-                send_as_text = wait.until(
+                # Check for "Don't ask again" checkbox indicating 2FA is present
+                dont_ask_again_button = WebDriverWait(driver, 2).until(
+                    EC.element_to_be_clickable((By.XPATH, '//s-slot/s-assigned-wrapper/div[1]/div/div/pvd-cc-auth-field-group/s-root/div//label'))
+                )
+
+                # Click "Don't ask again" to proceed
+                dont_ask_again_button.click()
+                very_short_sleep()
+            except:
+                logger.info("Don't ask again button not found.")
+
+            # Look for "Send as text" button
+            try:
+                send_as_text = WebDriverWait(driver, 2).until(
                     EC.element_to_be_clickable((
                         By.XPATH, '//*[@id="dom-try-another-way-link"]'))
                 )
                 send_as_text.click()
+            except:
+                logger.info("Send as text button not found.")
 
+            # Attempt 2FA via Text
+            try:
                 logger.info("Attempting to send 2FA code via text.")
                 text_code_button = wait.until(
                     EC.element_to_be_clickable((
@@ -450,7 +457,30 @@ def sell_after_login(driver, tickers, trade_share_count):
                 market_sell_button.click()
                 very_short_sleep()
 
-                preview_and_submit(driver)
+                # Preview button
+                preview_button = driver.find_element(By.XPATH, '//*[@id="previewOrderBtn"]/s-root/button')
+                preview_button.click()
+                very_short_sleep()
+
+                # Catch error if order is not submitted
+                try:
+                    short_sleep()
+                    error_message = driver.find_element(By.XPATH, '//*[@id="float_trade_SE"]/div/ap122489-ett-component/div/pvd-ett-modal[1]/s-root/div/div[2]')
+                    logger.error(f"Error: {error_message.text}")
+                    driver.find_element(By.XPATH, '//*[@id="float_trade_SE"]/div/ap122489-ett-component/div/pvd-ett-modal[1]/s-root/div/div[2]/div/button/pvd-scoped-icon-11980142/svg').click()
+                except:
+                    pass
+                    
+                # Submission
+                try:
+                    submit_button = WebDriverWait(driver, 10).until(
+                        EC.element_to_be_clickable((By.XPATH, '//*[@id="placeOrderBtn"]'))
+                    )
+                    submit_button.click()
+                    logger.info("Order successfully submitted!")
+                except:
+                    logger.error("Could not submit order...")
+                very_short_sleep()
                 # Start a new order
                 start_new_order(driver)
 
@@ -474,7 +504,7 @@ def getNumOfAccounts(driver):
     # Click trade
     try:
         trade_button = WebDriverWait(driver,10).until(
-            EC.element_to_be_clickable((By.XPATH, '//*[@id="action-bar--container"]/div[2]/div[1]/ul/li[1]/a'))
+            EC.element_to_be_clickable((By.XPATH, '//*[@id="action-bar--container"]/action-bar-menu/div[2]/div[1]/ul/li[1]'))
         )
         trade_button.click()
         short_sleep()
